@@ -1,0 +1,5 @@
+def joint_state_define(x):
+   js = JointState()
+   js.name = joint_ordering
+   js.position = tuple(x)
+   return js
