@@ -1,5 +1,5 @@
 [package]
-name = "RelaxedIK_Rust"
+name = "relaxed_ik_core"
 version = "0.1.0"
 authors = ["djrakita <djrakita@gmail.com>"]
 edition = "2018"
