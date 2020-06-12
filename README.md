@@ -1,10 +1,13 @@
-###Run
+# relaxed_ik_core
+
+## Run
 * Enter the interactive mode by running: 
 ```
 cargo run --bin relaxed_ik_node
 ```
 The solver converges in expected time.
-###Test
+
+## Test
 * Run the regression tests by running:
 ```
 cargo test --test ur5_regression_test -- --nocapture
