@@ -1,10 +1,10 @@
-use crate::lib::utils_rust::robot_shape_model::RobotShapeModel;
-use crate::lib::spacetime::robot::Robot;
-use crate::lib::utils_rust::yaml_utils::{RobotCollisionSpecFileParser, InfoFileParser};
-use crate::lib::utils_rust::file_utils::get_path_to_src;
-use crate::lib::utils_rust::collision_object::CollisionObject;
-use crate::lib::utils_rust::transformations;
-use crate::lib::utils_rust::sampler::{ThreadRobotSampler, ThreadSampler};
+use crate::utils_rust::robot_shape_model::RobotShapeModel;
+use crate::spacetime::robot::Robot;
+use crate::utils_rust::yaml_utils::{RobotCollisionSpecFileParser, InfoFileParser};
+use crate::utils_rust::file_utils::get_path_to_src;
+use crate::utils_rust::collision_object::CollisionObject;
+use crate::utils_rust::transformations;
+use crate::utils_rust::sampler::{ThreadRobotSampler, ThreadSampler};
 use nalgebra::{UnitQuaternion, Vector3, UnitComplex};
 use ncollide3d::query::{Proximity, PointQuery};
 

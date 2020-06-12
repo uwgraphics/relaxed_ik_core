@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use yaml_rust::{YamlLoader, Yaml};
 use nalgebra;
 use nalgebra::{DMatrix, DVector};
-use crate::lib::utils_rust::shape_parser_utils::{Cuboid, Sphere};
+use crate::utils_rust::shape_parser_utils::{Cuboid, Sphere};
 
 pub fn get_yaml_obj(fp: String) -> Vec<Yaml> {
     let mut file = File::open(fp.as_str()).unwrap();

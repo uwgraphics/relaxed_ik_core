@@ -1,5 +1,5 @@
-use crate::lib::groove::objective::*;
-use crate::lib::groove::vars::RelaxedIKVars;
+use crate::groove::objective::*;
+use crate::groove::vars::RelaxedIKVars;
 
 pub struct ObjectiveMaster {
     pub objectives: Vec<Box<dyn ObjectiveTrait>>,

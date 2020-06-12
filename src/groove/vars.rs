@@ -1,8 +1,8 @@
 use nalgebra::{UnitQuaternion, Vector3, Quaternion};
-use crate::lib::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser};
-use crate::lib::spacetime::robot::Robot;
-use crate::lib::groove::collision_nn::CollisionNN;
-use crate::lib::utils_rust::sampler::ThreadRobotSampler;
+use crate::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser};
+use crate::spacetime::robot::Robot;
+use crate::groove::collision_nn::CollisionNN;
+use crate::utils_rust::sampler::ThreadRobotSampler;
 
 
 #[derive(Clone, Debug)]

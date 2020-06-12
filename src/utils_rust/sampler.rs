@@ -3,7 +3,7 @@ extern crate rand;
 use rand::distributions::{Distribution, Uniform};
 use rand::{Rng};
 use rand::rngs::{ThreadRng, StdRng};
-use crate::lib::spacetime::robot::Robot;
+use crate::spacetime::robot::Robot;
 use std::marker::{Sync, Send};
 
 

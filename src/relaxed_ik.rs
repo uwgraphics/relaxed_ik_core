@@ -1,11 +1,11 @@
-use crate::lib::groove::vars::RelaxedIKVars;
-use crate::lib::groove::groove::{OptimizationEngineOpen, OptimizationEngineNLopt};
-use crate::lib::groove::objective_master::ObjectiveMaster;
-use crate::lib::utils_rust::file_utils::{*};
-use crate::lib::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
-use crate::lib::utils_rust::transformations::{*};
+use crate::groove::vars::RelaxedIKVars;
+use crate::groove::groove::{OptimizationEngineOpen, OptimizationEngineNLopt};
+use crate::groove::objective_master::ObjectiveMaster;
+use crate::utils_rust::file_utils::{*};
+use crate::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
+use crate::utils_rust::transformations::{*};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
-use crate::lib::utils_rust::sampler::ThreadSampler;
+use crate::utils_rust::sampler::ThreadSampler;
 
 //// Added by HS ////
 pub struct Pose {
@@ -16,7 +16,7 @@ pub struct Pose {
 impl Pose {
     pub fn new(pos: Vec<f64>, quat: Vec<f64>) -> Self {
         let position = Vector3::new(pos[0], pos[1], pos[2]);
-        let orientation = Quaternion::new(quat[0], quat[1], quat[2], quat[3]);
+        let orientation = Quaternion::new(quat[3], quat[0], quat[1], quat[2]);
         Self{position, orientation}
     }
 }

@@ -4,7 +4,7 @@ use ncollide3d::shape::FeatureId;
 use ncollide3d::shape::{Ball, Cuboid, Cylinder, Capsule, Cone, ConvexHull, Shape, TriMesh};
 use ncollide3d::bounding_volume::{self, BoundingVolume, BoundingSphere, AABB};
 use ncollide3d::transformation;
-use crate::lib::utils_rust::transformations;
+use crate::utils_rust::transformations;
 use std::boxed::Box;
 use nalgebra::{UnitQuaternion, Vector3, Translation3, Quaternion, Isometry3, DVector, Rotation3, Matrix3};
 use std::borrow::BorrowMut;

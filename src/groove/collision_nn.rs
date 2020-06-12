@@ -1,6 +1,6 @@
-use crate::lib::utils_rust::yaml_utils::NeuralNetParser;
-use crate::lib::utils_rust::{geometry_utils, yaml_utils};
-use crate::lib::spacetime::robot::Robot;
+use crate::utils_rust::yaml_utils::NeuralNetParser;
+use crate::utils_rust::{geometry_utils, yaml_utils};
+use crate::spacetime::robot::Robot;
 use nalgebra::{DMatrix, DVector};
 
 fn relu(x: f64) -> f64 {

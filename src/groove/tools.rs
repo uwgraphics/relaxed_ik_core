@@ -1,5 +1,5 @@
-use crate::lib::spacetime::robot::{Robot};
-use crate::lib::spacetime::arm::{Arm};
+use crate::spacetime::robot::{Robot};
+use crate::spacetime::arm::{Arm};
 
 #[derive(Clone, Debug)]
 pub struct RelaxedIKTools {

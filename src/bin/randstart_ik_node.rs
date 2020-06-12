@@ -1,10 +1,9 @@
-pub mod lib;
-use crate::lib::relaxed_ik;
-use crate::lib::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
+use relaxed_ik_core::relaxed_ik;
+use relaxed_ik_core::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use std::sync::{Arc, Mutex};
 use rosrust;
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
-use crate::lib::utils_rust::subscriber_utils::{*};
+use relaxed_ik_core::utils_rust::subscriber_utils::{*};
 
 
 mod msg {

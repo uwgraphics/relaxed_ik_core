@@ -1,5 +1,5 @@
-use crate::lib::spacetime::arm;
-use crate::lib::utils_rust::{geometry_utils, yaml_utils};
+use crate::spacetime::arm;
+use crate::utils_rust::{geometry_utils, yaml_utils};
 
 #[derive(Clone, Debug)]
 pub struct Robot {

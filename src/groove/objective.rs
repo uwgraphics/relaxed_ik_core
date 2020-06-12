@@ -1,8 +1,8 @@
-use crate::lib::groove::{vars, tools};
-use crate::lib::utils_rust::transformations::{*};
+use crate::groove::{vars, tools};
+use crate::utils_rust::transformations::{*};
 use nalgebra::geometry::{UnitQuaternion, Quaternion};
 use std::cmp;
-use crate::lib::groove::vars::RelaxedIKVars;
+use crate::groove::vars::RelaxedIKVars;
 
 pub fn groove_loss(x_val: f64, t: f64, d: i32, c: f64, f: f64, g: i32) -> f64 {
     -( (-(x_val - t).powi(d)) / (2.0 * c.powi(2) ) ).exp() + f * (x_val - t).powi(g)

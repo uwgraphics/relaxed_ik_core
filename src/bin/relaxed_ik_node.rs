@@ -1,26 +1,15 @@
-pub mod lib;
-use crate::lib::relaxed_ik;
-use crate::lib::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
+use relaxed_ik_core::relaxed_ik;
+use relaxed_ik_core::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use std::sync::{Arc, Mutex};
-// use rosrust;
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
-use crate::lib::utils_rust::subscriber_utils::{*};
+use relaxed_ik_core::utils_rust::subscriber_utils::{*};
 
-//// Added by HS ////
-use std::io;
-//// Added by HS ////
-
-// mod msg {
-//     rosrust::rosmsg_include!(relaxed_ik / EEPoseGoals, relaxed_ik / JointAngles);
-// }
+use std::{io, thread, time};
 
 fn main() {
-    // rosrust::init("relaxed_ik");
-
     println!("solver initialized!");
-
-    //// Added by HS ////
-    println!("Please enter the ee goal position: ");
+    
+    println!("Please enter the ee goal position separated by white spaces (e.g., 0.015 0.015 0.015): ");
 
     let mut v = relaxed_ik::EEPoseGoals::new();
     
@@ -29,7 +18,7 @@ fn main() {
     let pos_v: Vec<f64> = pos_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
     println!("{:?}", pos_v);
 
-    println!("Please enter the ee goal orientation: ");
+    println!("Please enter the ee goal orientation separated by white spaces (e.g., 0.0 0.0 0.0 1.0): ");
     let mut quat_buf = String::new();
     io::stdin().read_line(&mut quat_buf).expect("Failed to read line");
     let quat_v: Vec<f64> = quat_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
@@ -37,7 +26,6 @@ fn main() {
 
     let pose = relaxed_ik::Pose::new(pos_v, quat_v);
     v.ee_poses.push(pose);
-    //// Added by HS ////
     
     let mut r = relaxed_ik::RelaxedIK::from_loaded(1);
 
@@ -56,8 +44,6 @@ fn main() {
         g.quat_goals.push( UnitQuaternion::from_quaternion(tmp_q) );
     }
 
-    println!("{:?}", g.pos_goals);
-
     // let publisher = rosrust::publish("/relaxed_ik/joint_angle_solutions", 3).unwrap();
 
     // let rate1 = rosrust::rate(100.);
@@ -68,16 +54,20 @@ fn main() {
     // loop {
     // let x = r.solve(&arc.lock().unwrap());
     
-    let x = r.solve(&g);
-    println!("{:?}", x);
+    let rate = time::Duration::from_millis(10);
 
-    // let mut ja = msg::relaxed_ik::JointAngles::default();
-    let mut ja = relaxed_ik::JointAngles::new();
-    for i in 0..x.len() {
-        ja.data.push(x[i]);
+    loop {
+        let x = r.solve(&g);
+        println!("{:?}", x);
+
+        // let mut ja = msg::relaxed_ik::JointAngles::default();
+        let mut ja = relaxed_ik::JointAngles::new();
+        for i in 0..x.len() {
+            ja.data.push(x[i]);
+        }
+        // publisher.send(ja);
+
+        thread::sleep(rate);
+        // rate.sleep();
     }
-    // publisher.send(ja);
-
-    // rate.sleep();
-    // }
 }

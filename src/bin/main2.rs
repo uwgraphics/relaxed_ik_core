@@ -1,8 +1,6 @@
-pub mod lib;
-
-use lib::utils_rust::self_collision_engine::SelfCollisionEngine;
+use relaxed_ik_core::utils_rust::self_collision_engine::SelfCollisionEngine;
 use std::time::{Instant, Duration};
-use lib::utils_rust::sampler::{ThreadRobotSampler, ThreadSampler};
+use relaxed_ik_core::utils_rust::sampler::{ThreadRobotSampler, ThreadSampler};
 
 
 fn main() {

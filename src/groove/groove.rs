@@ -1,8 +1,8 @@
-use crate::lib::groove::gradient::{ForwardFiniteDiff, CentralFiniteDiff, GradientFinder, ForwardFiniteDiffImmutable, CentralFiniteDiffImmutable, GradientFinderImmutable};
-use crate::lib::groove::vars::{RelaxedIKVars};
+use crate::groove::gradient::{ForwardFiniteDiff, CentralFiniteDiff, GradientFinder, ForwardFiniteDiffImmutable, CentralFiniteDiffImmutable, GradientFinderImmutable};
+use crate::groove::vars::{RelaxedIKVars};
 use optimization_engine::{constraints::*, panoc::*, *};
 use nlopt::*;
-use crate::lib::groove::objective_master::ObjectiveMaster;
+use crate::groove::objective_master::ObjectiveMaster;
 
 pub struct OptimizationEngineOpen {
     dim: usize,
