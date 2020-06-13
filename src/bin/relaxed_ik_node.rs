@@ -7,27 +7,34 @@ use relaxed_ik_core::utils_rust::subscriber_utils::{*};
 use std::{io, thread, time};
 
 fn main() {
-    println!("solver initialized!");
-    
-    println!("Please enter the ee goal position separated by white spaces (e.g., 0.015 0.015 0.015): ");
+    println!("\nSolver initialized!\n");
+
+    println!("Please enter the name of the robot: \n(Available options are ur5 and yumi.)");
+    let mut name_buf = String::new();
+    io::stdin().read_line(&mut name_buf).expect("Failed to read line");
+    let name: String = name_buf.trim().to_string();
+
+    // let mut r = relaxed_ik::RelaxedIK::from_loaded(1);
+    let mut r = relaxed_ik::RelaxedIK::from_info_file_name(format!("{}_info.yaml", name), 1);
 
     let mut v = relaxed_ik::EEPoseGoals::new();
     
-    let mut pos_buf = String::new();
-    io::stdin().read_line(&mut pos_buf).expect("Failed to read line");
-    let pos_v: Vec<f64> = pos_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
-    println!("{:?}", pos_v);
+    for i in 0..r.vars.robot.num_chains {
+        println!("Chain {}: Please enter the ee goal position separated by white spaces (e.g., 0.015 0.015 0.015): ", i);
+        let mut pos_buf = String::new();
+        io::stdin().read_line(&mut pos_buf).expect("Failed to read line");
+        let pos_v: Vec<f64> = pos_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
+        // println!("{:?}", pos_v);
 
-    println!("Please enter the ee goal orientation separated by white spaces (e.g., 0.0 0.0 0.0 1.0): ");
-    let mut quat_buf = String::new();
-    io::stdin().read_line(&mut quat_buf).expect("Failed to read line");
-    let quat_v: Vec<f64> = quat_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
-    println!("{:?}", quat_v);
+        println!("Chain {}: Please enter the ee goal orientation separated by white spaces (e.g., 0.0 0.0 0.0 1.0): ", i);
+        let mut quat_buf = String::new();
+        io::stdin().read_line(&mut quat_buf).expect("Failed to read line");
+        let quat_v: Vec<f64> = quat_buf.trim().split_whitespace().map(|x| x.parse::<f64>().unwrap()).collect();
+        // println!("{:?}", quat_v);
 
-    let pose = relaxed_ik::Pose::new(pos_v, quat_v);
-    v.ee_poses.push(pose);
-    
-    let mut r = relaxed_ik::RelaxedIK::from_loaded(1);
+        let pose = relaxed_ik::Pose::new(pos_v, quat_v);
+        v.ee_poses.push(pose);
+    }
 
     let arc = Arc::new(Mutex::new(EEPoseGoalsSubscriber::new()));
     // let arc2 = arc.clone();
