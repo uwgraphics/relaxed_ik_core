@@ -31,7 +31,7 @@ impl PosQuatPair {
 
 #[test]
 fn compute_ja_solution() {
-    let robot_list = vec!["ur5", "yumi"];
+    let robot_list = vec!["ur5", "yumi", "panda"];
 
     for r_num in 0..robot_list.len() {
         let r_cur = robot_list[r_num];
