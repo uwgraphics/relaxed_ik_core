@@ -36,7 +36,7 @@ boxes:
 ```
 ![yumi env box](./screenshots/yumi_env_box.png) 
 
-* The collision meshes auto-generated are incorrect, maybe because of the headpan?
+* The collision meshes auto-generated for Sawyer are incorrect, maybe because of the headpan?
 ```
 The collision file includes nothing other than robot link radius and sample states
 ```
