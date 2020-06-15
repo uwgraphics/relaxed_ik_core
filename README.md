@@ -34,13 +34,13 @@ boxes:
   rotation: [0,0,0]
   translation: [0, 0, 0]
 ```
-![yumi env box](/home/haochen/Pictures/yumi_env_box.png) 
+![yumi env box](./screenshots/yumi_env_box.png) 
 
 * The collision meshes auto-generated are incorrect, maybe because of the headpan?
 ```
 The collision file includes nothing other than robot link radius and sample states
 ```
-![Sawyer collision meshes](/home/haochen/Pictures/sawyer_collision_meshes.png)
+![Sawyer collision meshes](./screenshots/sawyer_collision_meshes.png)
 
 * Panda robot arm: "Invalid prismatic joint.  Axis must be [1 0 0], [0 1 0], or [0 0 1]" I modified it from [0 -1 0] to [0 1 0] in the urdf and it seems everything works fine after that?
 ```
@@ -59,6 +59,6 @@ Exception: invalid prismatic joint.  Axis must be [1 0 0], [0 1 0], or [0 0 1]
 
 * Jaco7: The collision meshes for its fingers are incorrect.
 
-![Jaco7 collision meshes](/home/haochen/Pictures/jaco7_collision_meshes.png) 
+![Jaco7 collision meshes](./screenshots/jaco7_collision_meshes.png) 
 
 * I didn't find the ROS package for DRC-Hubo+ on the internet... According to the official website, it seems that I don't have the permission to access it.
