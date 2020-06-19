@@ -28,3 +28,6 @@ opt-level = 3
 [profile.release]
 opt-level = 3
 
+[lib]
+name = "relaxed_ik_node_ros2"
+crate-type = ["dylib"]
