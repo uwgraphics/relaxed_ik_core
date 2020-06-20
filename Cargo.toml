@@ -29,5 +29,5 @@ opt-level = 3
 opt-level = 3
 
 [lib]
-name = "relaxed_ik_node_ros2"
+name = "relaxed_ik_ros2"
 crate-type = ["dylib"]
