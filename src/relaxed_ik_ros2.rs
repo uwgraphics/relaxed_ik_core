@@ -5,6 +5,7 @@ use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 // use crate::utils_rust::subscriber_utils::{*};
 use std::io::{self, Write};
 use std::os::raw::{c_double, c_int};
+use std::cell::RefCell;
 
 #[repr(C)]
 pub struct Opt {
@@ -15,7 +16,6 @@ pub struct Opt {
 #[no_mangle]
 pub unsafe extern "C" fn rust_run(pos_arr: *const c_double, pos_length: c_int, 
     quat_arr: *const c_double, quat_length: c_int) -> Opt {
-    println!("\nWrapper called!\n");
     io::stdout().flush().unwrap();
     assert!(!pos_arr.is_null(), "Null pointer for pos goals");
     assert!(!quat_arr.is_null(), "Null pointer for quat goals");
@@ -33,41 +33,29 @@ pub unsafe extern "C" fn rust_run(pos_arr: *const c_double, pos_length: c_int,
     Opt {data: ptr, length: len as c_int}
 }
 
+thread_local!(static R: RefCell<relaxed_ik::RelaxedIK> = RefCell::new(relaxed_ik::RelaxedIK::from_loaded(1)));
+
 fn run(pos_goals: Vec<f64>, quat_goals: Vec<f64>) -> Vec<f64> {
-    println!("\nRunner called!\n");
-
-    let mut r = relaxed_ik::RelaxedIK::from_loaded(1);
-
-    let mut v = relaxed_ik::EEPoseGoals::new();
-
-    for i in 0..r.vars.robot.num_chains {   
-        let pos_v: Vec<f64> = (&pos_goals[3*i..3*i+3]).to_vec();
-        println!("pos: {:?}", pos_v);
-
-        let quat_v: Vec<f64> = (&quat_goals[3*i..3*i+4]).to_vec();
-        println!("quat: {:?}", quat_v);
-
-        let pose = relaxed_ik::Pose::new(pos_v, quat_v);
-        v.ee_poses.push(pose);
-        io::stdout().flush().unwrap();
-    }
+    let mut x: Vec<f64> = Vec::new();
 
     let arc = Arc::new(Mutex::new(EEPoseGoalsSubscriber::new()));
-    // let arc2 = arc.clone();
 
     let mut g = arc.lock().unwrap();
-    g.pos_goals = Vec::new();
-    g.quat_goals = Vec::new();
 
-    let num_poses = v.ee_poses.len();
+    // while arc.lock().unwrap().pos_goals.is_empty() {}
 
-    for i in 0..num_poses {
-        g.pos_goals.push( Vector3::new(v.ee_poses[i].position.x, v.ee_poses[i].position.y, v.ee_poses[i].position.z) );
-        let tmp_q = Quaternion::new(v.ee_poses[i].orientation.coords.w, v.ee_poses[i].orientation.coords.x, v.ee_poses[i].orientation.coords.y, v.ee_poses[i].orientation.coords.z);
-        g.quat_goals.push( UnitQuaternion::from_quaternion(tmp_q) );
-    }
+    R.with(|r| {
+        for i in 0..(*r.borrow()).vars.robot.num_chains {
+            g.pos_goals.push( Vector3::new(pos_goals[3*i], pos_goals[3*i+1], pos_goals[3*i+2]) );
+            let tmp_q = Quaternion::new(quat_goals[3*i], quat_goals[3*i+1], quat_goals[3*i+2], quat_goals[3*i+3]);
+            g.quat_goals.push( UnitQuaternion::from_quaternion(tmp_q) );
+        }
 
-    let x = r.solve(&g);
-    println!("{:?}", x);
+        // println!("pos: {:?}, quat: {:?}", g.pos_goals, g.quat_goals);
+    
+        x = (*r.borrow_mut()).solve(&g);
+        println!("{:?}", x);
+    });
+    
     x
 }
