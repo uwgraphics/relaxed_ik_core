@@ -17,10 +17,10 @@ time = "0.1"
 kdtree = "0.6.0"
 vpsearch = "1.3.5"
 ndarray-rand = "0.11.0"
-rosrust = "0.9.0"
 rand = "0.7.2"
 ncollide2d = "0.19"
 ncollide3d = "0.21.0"
+path-slash = "0.1.2"
 
 [profile.dev]
 opt-level = 3
@@ -29,5 +29,5 @@ opt-level = 3
 opt-level = 3
 
 [lib]
-name = "relaxed_ik_ros2"
+name = "relaxed_ik"
 crate-type = ["dylib"]
