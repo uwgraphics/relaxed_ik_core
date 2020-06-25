@@ -7,7 +7,7 @@ use std::os::raw::{c_double, c_int};
 use std::cell::RefCell;
 
 #[no_mangle]
-pub unsafe extern "C" fn run_ros2(pos_arr: *const c_double, pos_length: c_int, 
+pub unsafe extern "C" fn run_ros1(pos_arr: *const c_double, pos_length: c_int, 
     quat_arr: *const c_double, quat_length: c_int) -> relaxed_ik::Opt {
     assert!(!pos_arr.is_null(), "Null pointer for pos goals");
     assert!(!quat_arr.is_null(), "Null pointer for quat goals");

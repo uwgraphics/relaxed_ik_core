@@ -7,42 +7,50 @@ use crate::utils_rust::transformations::{*};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use crate::utils_rust::sampler::ThreadSampler;
 
-//// Added by HS ////
-pub struct Pose {
-    pub position: Vector3<f64>,
-    pub orientation: Quaternion<f64>
-}
+use std::os::raw::{c_double, c_int};
 
-impl Pose {
-    pub fn new(pos: Vec<f64>, quat: Vec<f64>) -> Self {
-        let position = Vector3::new(pos[0], pos[1], pos[2]);
-        let orientation = Quaternion::new(quat[3], quat[0], quat[1], quat[2]);
-        Self{position, orientation}
-    }
-}
+// //// Added by HS for regresstion tests////
+// pub struct Pose {
+//     pub position: Vector3<f64>,
+//     pub orientation: Quaternion<f64>
+// }
 
-pub struct EEPoseGoals {
-    pub ee_poses: Vec<Pose>
-}
+// impl Pose {
+//     pub fn new(pos: Vec<f64>, quat: Vec<f64>) -> Self {
+//         let position = Vector3::new(pos[0], pos[1], pos[2]);
+//         let orientation = Quaternion::new(quat[3], quat[0], quat[1], quat[2]);
+//         Self{position, orientation}
+//     }
+// }
 
-impl EEPoseGoals {
-    pub fn new() -> Self {
-        let ee_poses: Vec<Pose> = Vec::new();
-        Self{ee_poses}
-    }
-}
+// pub struct EEPoseGoals {
+//     pub ee_poses: Vec<Pose>
+// }
 
-pub struct JointAngles {
-    pub data: Vec<f64>
-}
+// impl EEPoseGoals {
+//     pub fn new() -> Self {
+//         let ee_poses: Vec<Pose> = Vec::new();
+//         Self{ee_poses}
+//     }
+// }
 
-impl JointAngles {
-    pub fn new() -> Self {
-        let data: Vec<f64> = Vec::new();
-        Self{data}
-    }
+// pub struct JointAngles {
+//     pub data: Vec<f64>
+// }
+
+// impl JointAngles {
+//     pub fn new() -> Self {
+//         let data: Vec<f64> = Vec::new();
+//         Self{data}
+//     }
+// }
+// //// Added by HS ////
+
+#[repr(C)]
+pub struct Opt {
+    pub data: *const c_double,
+    pub length: c_int,
 }
-//// Added by HS ////
 
 pub struct RelaxedIK {
     pub vars: RelaxedIKVars,
