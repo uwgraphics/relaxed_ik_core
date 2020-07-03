@@ -3,7 +3,7 @@ fixed_frame: "world"
 joint_names: [ [ "world_iiwa_joint", "iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7", "iiwa_joint_ee" ] ]
 joint_ordering: [ "iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7" ]
 ee_fixed_joints: [ "iiwa_joint_ee" ]
-starting_config: [ 0.82862647831071, 2.05948851735, -0.35068551594466024, 2.05948851735, 2.0718594110911095, 2.05948851735, -1.32310967132729 ]
+starting_config: [1.7, 0.0, 1.7, 1.3, 2.0, 0.6, 1.0]
 collision_file_name: "collision_iiwa7.yaml"
 collision_nn_file: "iiwa7_nn"
 path_to_src: "/home/haochen/catkin_ws/src/relaxed_ik/src"
