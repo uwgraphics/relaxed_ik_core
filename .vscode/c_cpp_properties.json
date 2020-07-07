@@ -1,26 +1,31 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "",
-        "limitSymbolsToIncludedHeaders": true
-      },
-      "includePath": [
-        "/home/haochen/catkin_ws/devel/include/**",
-        "/opt/ros/melodic/include/**",
-        "/home/haochen/catkin_ws/src/beginner_tutorials/include/**",
-        "/home/haochen/catkin_ws/src/iiwa_stack/iiwa_hw/include/**",
-        "/home/haochen/catkin_ws/src/iiwa_stack/iiwa_ros/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2n6s300_ikfast/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2s6s300_ikfast/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2s7s300_ikfast/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/kinova_arm_moveit_demo/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_driver/include/**",
-        "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/m1n6s300_ikfast/include/**",
-        "/home/haochen/catkin_ws/src/universal_robot/ur_kinematics/include/**",
-        "/usr/include/**"
-      ],
-      "name": "ROS"
-    }
-  ]
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/haochen/catkin_ws/devel/include/**",
+                "/opt/ros/melodic/include/**",
+                "/home/haochen/catkin_ws/src/beginner_tutorials/include/**",
+                "/home/haochen/catkin_ws/src/iiwa_stack/iiwa_hw/include/**",
+                "/home/haochen/catkin_ws/src/iiwa_stack/iiwa_ros/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2n6s300_ikfast/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2s6s300_ikfast/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/j2s7s300_ikfast/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/kinova_arm_moveit_demo/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_driver/include/**",
+                "/home/haochen/catkin_ws/src/kinova-ros/kinova_moveit/inverse_kinematics_plugins/ikfast/m1n6s300_ikfast/include/**",
+                "/home/haochen/catkin_ws/src/universal_robot/ur_kinematics/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++14"
+        }
+    ],
+    "version": 4
 }
