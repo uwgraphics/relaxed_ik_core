@@ -1,8 +1,9 @@
-extern crate relaxed_ik_core;
-use relaxed_ik_core::relaxed_ik;
-use relaxed_ik_core::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
+extern crate relaxed_ik_lib;
+use relaxed_ik_lib::relaxed_ik;
+use relaxed_ik_lib::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use std::fs;
+use std::sync::{Arc, Mutex};
 
 pub struct PosQuatPair {
     pub pos_v: Vec<Vec<Vec<f64>>>,
@@ -49,22 +50,17 @@ fn compute_ja_solution() {
                 let index = i * pair.pos_v.len() + j;
                 println!("{} Test {} Input: ", r_cur, index);
 
-                let mut v = relaxed_ik::EEPoseGoals::new();
+                let arc = Arc::new(Mutex::new(EEPoseGoalsSubscriber::new()));
+                let mut g = arc.lock().unwrap();
+                
                 for k in 0..r.vars.robot.num_chains {
                     println!("\tChain {} Goal position: {:?}\n\tChain {} Goal orientation: {:?}", k, pair.pos_v[i][k], k, pair.quat_v[j][k]);
-                    let pose = relaxed_ik::Pose::new(pair.pos_v[i][k].clone(), pair.quat_v[j][k].clone());
-                    v.ee_poses.push(pose);
-                }
-
-                let mut g = EEPoseGoalsSubscriber::new();
-                g.pos_goals = Vec::new();
-                g.quat_goals = Vec::new();
-
-                let num_poses = v.ee_poses.len();
-                for i in 0..num_poses {
-                    g.pos_goals.push( Vector3::new(v.ee_poses[i].position.x, v.ee_poses[i].position.y, v.ee_poses[i].position.z) );
-                    let tmp_q = Quaternion::new(v.ee_poses[i].orientation.coords.w, v.ee_poses[i].orientation.coords.x, v.ee_poses[i].orientation.coords.y, v.ee_poses[i].orientation.coords.z);
-                    g.quat_goals.push( UnitQuaternion::from_quaternion(tmp_q) );
+                    let pos_goal = Vector3::new(pair.pos_v[i][k][0], pair.pos_v[i][k][1], pair.pos_v[i][k][2]);
+                    g.pos_goals.push(pos_goal);
+            
+                    let tmp_q = Quaternion::new(pair.quat_v[j][k][3], pair.quat_v[j][k][0], pair.quat_v[j][k][1], pair.quat_v[j][k][2]);
+                    let quat_goal = UnitQuaternion::from_quaternion(tmp_q);
+                    g.quat_goals.push(quat_goal);
                 }
             
                 let mut ja = String::new();
@@ -78,7 +74,6 @@ fn compute_ja_solution() {
                 println!("{} Test {} Output: \n\tp{}q{}.out at ./{}/output\n", r_cur, index, i, j, r_cur);
 
                 let expected: String = fs::read_to_string(format!("tests/{}/expected/p{}q{}_e.out", r_cur, i, j)).expect("Unable to read data");
-                
                 assert_eq!(ja, expected);
             }
         }

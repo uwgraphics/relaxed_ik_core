@@ -29,12 +29,8 @@ thread_local!(static R: RefCell<relaxed_ik::RelaxedIK> = RefCell::new(relaxed_ik
 
 fn run(pos_goals: Vec<f64>, quat_goals: Vec<f64>) -> Vec<f64> {
     let mut x: Vec<f64> = Vec::new();
-
     let arc = Arc::new(Mutex::new(EEPoseGoalsSubscriber::new()));
-
     let mut g = arc.lock().unwrap();
-
-    // while arc.lock().unwrap().pos_goals.is_empty() {}
 
     R.with(|r| {
         for i in 0..(*r.borrow()).vars.robot.num_chains {

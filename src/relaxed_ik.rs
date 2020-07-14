@@ -9,43 +9,6 @@ use crate::utils_rust::sampler::ThreadSampler;
 
 use std::os::raw::{c_double, c_int};
 
-// //// Added by HS for regresstion tests////
-// pub struct Pose {
-//     pub position: Vector3<f64>,
-//     pub orientation: Quaternion<f64>
-// }
-
-// impl Pose {
-//     pub fn new(pos: Vec<f64>, quat: Vec<f64>) -> Self {
-//         let position = Vector3::new(pos[0], pos[1], pos[2]);
-//         let orientation = Quaternion::new(quat[3], quat[0], quat[1], quat[2]);
-//         Self{position, orientation}
-//     }
-// }
-
-// pub struct EEPoseGoals {
-//     pub ee_poses: Vec<Pose>
-// }
-
-// impl EEPoseGoals {
-//     pub fn new() -> Self {
-//         let ee_poses: Vec<Pose> = Vec::new();
-//         Self{ee_poses}
-//     }
-// }
-
-// pub struct JointAngles {
-//     pub data: Vec<f64>
-// }
-
-// impl JointAngles {
-//     pub fn new() -> Self {
-//         let data: Vec<f64> = Vec::new();
-//         Self{data}
-//     }
-// }
-// //// Added by HS ////
-
 #[repr(C)]
 pub struct Opt {
     pub data: *const c_double,
@@ -198,5 +161,4 @@ impl RelaxedIK {
             return (true, out_x)
         }
     }
-
 }

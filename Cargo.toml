@@ -29,5 +29,10 @@ opt-level = 3
 opt-level = 3
 
 [lib]
-name = "relaxed_ik"
-crate-type = ["dylib"]
+name = "relaxed_ik_lib"
+path = "src/lib.rs"
+crate-type = ["rlib", "dylib"]
+
+[[bin]]
+name = "relaxed_ik_bin"
+path = "src/bin/relaxed_ik_bin.rs"
