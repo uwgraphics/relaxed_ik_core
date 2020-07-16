@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="
+		
+		An inverse kinematics (IK) solver
+		"> 
+    
+	<meta name="author" content=" Daniel Rakita ">  
+    <base href="">
+    <title>Sections</title>
+
+    
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    
+    <link href="css/landing-page.css" rel="stylesheet">
+
+    
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    
+    <link href="css/bootstrap-social.css" rel="stylesheet">
+
+    
+    
+    
+
+    <style>
+    .navbar {
+    border-color: #e7e7e7;
+}
+
+.content-section-a,
+footer,
+.navbar {
+  background-color: white;
+  color: #333;
+}
+
+.navbar a:link,
+.navbar-default .navbar-nav>li>a {
+  color: #777;
+}
+
+.navbar a:hover,
+.navbar-default .navbar-nav>li>a:hover {
+  color: rgb(51, 51, 51);
+}
+
+.content-section-b {
+  background-color: white;
+  color: #333;
+}
+
+body {
+  color: rgb(51, 51, 51);
+}
+
+.header-container h1,
+.header-container h2,
+.header-container h3,
+.header-container h4 {
+  color: rgb(51, 51, 51);
+}
+ 
+  </style>
+
+</head>
+<body>
+
+<section id="intro">
+	
+	<div class="intro-header">
+
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12">
+				
+					<div class="intro-message">
+						<h1>Relaxed IK</h1>
+						<h3>An inverse kinematics (IK) solver</h3>
+						<hr class="intro-divider">
+
+						<ul class="list-inline intro-social-buttons">
+						
+
+
+  <li><a href="//github.com/uwgraphics/relaxed_ik_core" class="btn btn-default btn-lg" title="GitHub">
+  <i class="fa fa-github"></i>
+  </a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="//youtube.com/watch?v=AhsQFJzB8WQ&amp;feature=youtu.be" title="YouTube" class="btn btn-default btn-lg">
+  <i class="fa fa-youtube"></i>
+  </a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <li><a href="mailto:rakita@cs.wisc.edu" title="Email" class="btn btn-default btn-lg">
+  <i class="fa fa-envelope"></i>
+  </a></li>
+
+
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+	
+</section>
+
+<section id="main">
+
+
+
+	 
+    <div class="content-section-a">
+    
+   
+        <div class="container">
+
+            <div class="row">
+                <div>
+                    
+                    <h2 class="section-heading">About</h2>
+                    <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <!-- raw HTML omitted --> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion <!-- raw HTML omitted --> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
+<p>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): 
+<a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></p>
+<p>Video explaining relaxedIK: 
+<a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></p>
+<p>RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &ldquo;move the robot&rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&rdquo;) to Joint-Space (i.e., the robot&rsquo;s rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.</p>
+
+                </div>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+	
+    <div class="content-section-b">
+    
+   
+        <div class="container">
+
+            <div class="row">
+                <div>
+                    
+                    <h2 class="section-heading">Wrappers</h2>
+                    <p>This section introduces three wrappers that we implemented for ROS, ROS2, and Unity.</p>
+<h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
+<p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</p>
+<p>This is a cleaner version of Relaxed IK wrapped up in ROS1 with pre-generated config files of some mostly used pre-computed robot arms. For the complete version, please follow this link <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a>.</p>
+<h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
+<p>Under developed at <a href="https://github.com/uwgraphics/relaxed_ik_ros2">relaxed_ik_ros2</a>.</p>
+<p>This is Relaxed IK wrapped up in ROS2.</p>
+<h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
+<p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</p>
+<p>This is the Unity wrapper of Relaxed IK designed to be run on Windows. The simulation of a few commonly used robot arms have already been set up to play with.</p>
+
+                </div>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+
+</section>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8" style="padding-left: 0px; width:100%">
+				<ul class="list-inline">
+					<li>
+						<a class="page-scroll" href="#intro">Up</a>
+					</li>
+					
+					
+				 </ul>
+				 <p class="copyright text-muted small" style="text-align:left;">
+                    Copyright &copy; Relaxed IK All Rights Reserved 
+                        </br>Built with <a href="http://gohugo.io">Hugo</a> and the <a href="https://github.com/cdeck3r/OneDly-Theme">OneDly project</a> theme.
+                 </p>
+			</div>
+            
+        </div>
+    </div>
+</footer>
+
+<script src="js/jquery-1.11.0.js"></script>
+
+
+<script src="js/jquery.easing.min.js"></script>
+
+
+<script src="js/bootstrap.min.js"></script>
+
+
+
+</body>
+</html>
+
