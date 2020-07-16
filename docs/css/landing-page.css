@@ -40,16 +40,17 @@ h6 {
 }
 
 .intro-message > h3 {
-    font-family: -apple-system-headline, 'HelveticaNeue-Light', 'Helvetica Neue', Helvetica, sans-serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: italic;
 }
 
 .intro-message > h1 {
-    font-family: -apple-system-subheadline, 'HelveticaNeue-UltraLight', 'Helvetica Neue', Helvetica, sans-serif;
+    font-family: Georgia, 'Times New Roman', Times, serif;
     font-size: 5em;
 }
 
 .intro-divider {
-    width: 400px;
+    width: 500px;
     border-top: 1px solid #f8f8f8;
     border-bottom: 1px solid rgba(0,0,0,0.2);
 }
@@ -63,7 +64,8 @@ h6 {
 
 .container {
     width: 900px;
-    line-height: 1.2em;
+    line-height: 1.6em;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .header-container {
@@ -81,23 +83,23 @@ h6 {
 }
 
 .container h3 {
-    margin-top: 20px;
-    margin-bottom: 10px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .content-section-a {
-    padding: 50px 0;
+    padding: 10px 0;
     background-color: #f8f8f8;
 }
 
 .content-section-b {
-    padding: 50px 0;
-    border-top: 1px solid #e7e7e7;
-    border-bottom: 1px solid #e7e7e7;
+    padding: 10px 0;
 }
 
 .section-heading {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 .section-heading-spacer {
@@ -154,14 +156,14 @@ h6 {
 }
 
 footer {
-    padding: 50px 0;
+    padding-top: 20px;
+    padding-bottom: 50px;
     background-color: #f8f8f8;
 }
 
 p.copyright {
-    margin: 15px 0 0;
+    margin: 10px 0 0;
 }
-
 
 @media(max-width:1000px) {
     .intro-message {
