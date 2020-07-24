@@ -8,7 +8,7 @@
   </url>
   
   <url>
-    <loc>/post/project/</loc>
+    <loc>/post/core/</loc>
     <lastmod>2019-08-07T00:00:00+00:00</lastmod>
   </url>
   
@@ -19,6 +19,11 @@
   
   <url>
     <loc>/post/</loc>
+    <lastmod>2019-08-07T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/wrappers/</loc>
     <lastmod>2019-08-07T00:00:00+00:00</lastmod>
   </url>
   

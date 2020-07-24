@@ -231,17 +231,37 @@ body {
             <div class="row">
                 <div>
                     
-                    <h2 class="section-heading">Code</h2>
-                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>, however, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity.</p>
+                    <h2 class="section-heading">Core</h2>
+                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core doesn&rsquo;t run independently on a pre-computed robot, please refer to the wrapper section for more information.</p>
+
+                </div>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+	 
+    <div class="content-section-a">
+    
+   
+        <div class="container">
+
+            <div class="row">
+                <div>
+                    
+                    <h2 class="section-heading">Wrappers</h2>
+                    <p>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.</p>
 <h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</p>
-<p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used pre-computed robot arms. For the complete version, please follow this link <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a>.</p>
+<p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version instead. In the complete version, you will have the opportunity to set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc.</p>
 <h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
 <p>Under developed at <a href="https://github.com/uwgraphics/relaxed_ik_ros2">relaxed_ik_ros2</a>.</p>
-<p>This is Relaxed IK wrapped up in ROS2.</p>
+<p>This is RelaxedIK wrapped up in ROS2.</p>
 <h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</p>
-<p>This is the Unity wrapper of Relaxed IK designed to be run on Windows. The simulation of a few commonly used robot arms have already been set up to play with.</p>
+<p>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a Linux machine. The simulation of a few commonly used robot arms have already been set up to play with.</p>
 
                 </div>
             </div>

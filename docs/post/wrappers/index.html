@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="generator" content="Hugo 0.73.0" />
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="
-		
-		An inverse kinematics (IK) solver
+		Wrappers
 		"> 
     
 	<meta name="author" content=" Daniel Rakita ">  
     <base href="">
-    <title>Relaxed IK</title>
+    <title>Wrappers</title>
 
     
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -113,185 +111,18 @@ body {
     
 </nav>
 
-<section id="intro">
-	
-	<div class="intro-header">
 
-		<div class="container">
-			<div class="row">
-				<div class="col-lg-12">
-				
-					<div class="intro-message">
-						<h1>Relaxed IK</h1>
-						<h3>An inverse kinematics (IK) solver</h3>
-						<hr class="intro-divider">
+<section id="services">
+   <div class="content-section-a">
 
-						<ul class="list-inline intro-social-buttons">
-						
+      <div class="container">
 
-
-  <li><a href="//github.com/uwgraphics/relaxed_ik_core" class="btn btn-default btn-lg" title="GitHub">
-  <i class="fa fa-github"></i>
-  </a></li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <li><a href="//youtube.com/watch?v=AhsQFJzB8WQ&amp;feature=youtu.be" title="YouTube" class="btn btn-default btn-lg">
-  <i class="fa fa-youtube"></i>
-  </a></li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  <li><a href="mailto:rakita@cs.wisc.edu" title="Email" class="btn btn-default btn-lg">
-  <i class="fa fa-envelope"></i>
-  </a></li>
-
-
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-	</div>
-	
-</section>
-
-<section id="main">
-
-
-
-	 
-    <div class="content-section-a">
-    
-   
-        <div class="container">
-
-            <div class="row">
-                <div>
-                    
-                    <h2 class="section-heading">About</h2>
-                    <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <!-- raw HTML omitted --> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion <!-- raw HTML omitted --> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
-<ul>
-<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): 
-<a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
-<li>Video explaining RelaxedIK: 
-<a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
-</ul>
-<p>RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &ldquo;move the robot&rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&rdquo;) to Joint-Space (i.e., the robot&rsquo;s rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.</p>
-
-                </div>
-            </div>
-
-        </div>
-        
-
-    </div>
-
-	
-    <div class="content-section-b">
-    
-   
-        <div class="container">
-
-            <div class="row">
-                <div>
-                    
-                    <h2 class="section-heading">Core</h2>
-                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core doesn&rsquo;t run independently on a pre-computed robot, please refer to the wrapper section for more information.</p>
-
-                </div>
-            </div>
-
-        </div>
-        
-
-    </div>
-
-	 
-    <div class="content-section-a">
-    
-   
-        <div class="container">
-
-            <div class="row">
-                <div>
-                    
-                    <h2 class="section-heading">Wrappers</h2>
-                    <p>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.</p>
+        <div class="row">
+          <div>
+            <hr class="section-heading-spacer">
+            <div class="clearfix"></div>
+            <h2 class="section-heading">Wrappers</h2>
+            <p>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.</p>
 <h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</p>
 <p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version instead. In the complete version, you will have the opportunity to set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc.</p>
@@ -302,59 +133,13 @@ body {
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</p>
 <p>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a Linux machine. The simulation of a few commonly used robot arms have already been set up to play with.</p>
 
-                </div>
-            </div>
-
         </div>
-        
-
     </div>
 
+</div>
+</div>
 
 </section>
-
-
-<section id = "social-share-section">
-
-	<div class="container">
-		<div class="row">
-			<ul class="list-inline" style="margin-bottom: 10px; margin-top: 10px;">
-				
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			</ul>
-		</div>
-	</div>
-
-</section>
-
 
 <footer>
     <div class="container">

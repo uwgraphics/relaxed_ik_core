@@ -22,15 +22,23 @@
     </item>
     
     <item>
-      <title>Code</title>
-      <link>/post/project/</link>
+      <title>Core</title>
+      <link>/post/core/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
-      <guid>/post/project/</guid>
-      <description>The core part of RelaxedIK is at relaxed_ik_core, however, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity.
+      <guid>/post/core/</guid>
+      <description>The core part of RelaxedIK is at relaxed_ik_core. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core doesn&amp;rsquo;t run independently on a pre-computed robot, please refer to the wrapper section for more information.</description>
+    </item>
+    
+    <item>
+      <title>Wrappers</title>
+      <link>/post/wrappers/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/wrappers/</guid>
+      <description>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.
 Relaxed IK ROS Available at relaxed_ik_ros1.
-This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used pre-computed robot arms. For the complete version, please follow this link relaxed_ik.
-Relaxed IK ROS2 (Under developed) Under developed at relaxed_ik_ros2.</description>
+This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms.</description>
     </item>
     
   </channel>
