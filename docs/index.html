@@ -244,13 +244,15 @@ body {
                 <div>
                     
                     <h2 class="section-heading">About</h2>
-                    <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <!-- raw HTML omitted --> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion <!-- raw HTML omitted --> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
+                    <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <i> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion </i> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
+
 <ul>
-<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): 
+<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00):
 <a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
-<li>Video explaining RelaxedIK: 
+<li>Video explaining RelaxedIK:
 <a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
 </ul>
+
 <p>RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &ldquo;move the robot&rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&rdquo;) to Joint-Space (i.e., the robot&rsquo;s rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.</p>
 
                 </div>
@@ -271,7 +273,7 @@ body {
                 <div>
                     
                     <h2 class="section-heading">Core</h2>
-                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core doesn&rsquo;t run independently on a pre-computed robot, please refer to the wrapper section for more information.</p>
+                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the wrappers section for more information.</p>
 
                 </div>
             </div>
@@ -291,16 +293,81 @@ body {
                 <div>
                     
                     <h2 class="section-heading">Wrappers</h2>
-                    <p>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.</p>
+                    
+
+<p>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect it to different interfaces. Here are three wrappers that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in their README.</p>
+
 <h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
+
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</p>
-<p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version instead. In the complete version, you will have the opportunity to set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc.</p>
+
+<p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link instead <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version. In the complete version, you will have the opportunity to (and have to) set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc. The complete version is recommended if you would like to work on the configuration process yourself or a robot that we didn&rsquo;t include in the available options; otherwise, this wrapper is likely to make your life much easier since everything you need to do will be setting the name of the robot you would like to work with.</p>
+
+<p>Please refer to the README in the repo for more infomation.</p>
+
 <h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
+
 <p>Under developed at <a href="https://github.com/uwgraphics/relaxed_ik_ros2">relaxed_ik_ros2</a>.</p>
+
 <p>This is RelaxedIK wrapped up in ROS2.</p>
+
 <h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
+
 <p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</p>
-<p>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a Linux machine. The simulation of a few commonly used robot arms have already been set up to play with.</p>
+
+<p>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:</p>
+
+<p><img src="images/unity1.png" alt="Unity screenshot1" width="100%"/></p>
+
+<p style="text-align:center; padding-bottom:10px">(1) Unity RelaxedIK disabled</p>
+
+<p><img src="images/unity2.png" alt="Unity screenshot2" width="100%"/></p>
+
+<p style="text-align:center; padding-bottom:10px">(2) Unity RelaxedIK enabled</p>
+
+<p>Please refer to the README in the repo for more infomation.</p>
+
+                </div>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+	
+    <div class="content-section-b">
+    
+   
+        <div class="container">
+
+            <div class="row">
+                <div>
+                    
+                    <h2 class="section-heading">FAQs</h2>
+                    <p>Q:</p>
+
+<p>A:</p>
+
+                </div>
+            </div>
+
+        </div>
+        
+
+    </div>
+
+	 
+    <div class="content-section-a">
+    
+   
+        <div class="container">
+
+            <div class="row">
+                <div>
+                    
+                    <h2 class="section-heading">Contact</h2>
+                    <p>If you have any comments or questions on any of this, or if you encounter any bugs in the wrappers of the solver, feel free to post an issue or email me directly at rakita@cs.wisc.edu.</p>
 
                 </div>
             </div>

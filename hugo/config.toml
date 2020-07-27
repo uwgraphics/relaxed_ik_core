@@ -135,3 +135,6 @@ theme = "onedly"
 
   [services.twitter]
     disableInlineCSS = true
+
+[markup]
+  defaultMarkdownHandler = "blackfriday"

@@ -17,8 +17,17 @@
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/about/</guid>
-      <description>Welcome to RelaxedIK! This solver implements the methods discussed in our paper RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion (http://www.roboticsproceedings.org/rss14/p43.html)
+      <description>Welcome to RelaxedIK! This solver implements the methods discussed in our paper  RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion  (http://www.roboticsproceedings.org/rss14/p43.html)
  Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): https://youtu.be/bih5e9MHc88?t=737 Video explaining RelaxedIK: https://youtu.be/AhsQFJzB8WQ  RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &amp;ldquo;move the robot&amp;rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&amp;rdquo;) to Joint-Space (i.</description>
+    </item>
+    
+    <item>
+      <title>Contact</title>
+      <link>/post/contact/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/contact/</guid>
+      <description>If you have any comments or questions on any of this, or if you encounter any bugs in the wrappers of the solver, feel free to post an issue or email me directly at rakita@cs.wisc.edu.</description>
     </item>
     
     <item>
@@ -27,7 +36,17 @@
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/core/</guid>
-      <description>The core part of RelaxedIK is at relaxed_ik_core. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core doesn&amp;rsquo;t run independently on a pre-computed robot, please refer to the wrapper section for more information.</description>
+      <description>The core part of RelaxedIK is at relaxed_ik_core. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the wrappers section for more information.</description>
+    </item>
+    
+    <item>
+      <title>FAQs</title>
+      <link>/post/faq/</link>
+      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>/post/faq/</guid>
+      <description>Q:
+A:</description>
     </item>
     
     <item>
@@ -36,9 +55,8 @@
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/wrappers/</guid>
-      <description>Although the core is runnable, it is usually not intended to be run alone. Here are three wrappers of RelaxedIK that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in README of their repos.
-Relaxed IK ROS Available at relaxed_ik_ros1.
-This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms.</description>
+      <description>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect it to different interfaces. Here are three wrappers that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in their README.
+Relaxed IK ROS Available at relaxed_ik_ros1.</description>
     </item>
     
   </channel>
