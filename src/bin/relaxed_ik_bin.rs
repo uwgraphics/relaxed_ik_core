@@ -9,7 +9,7 @@ use std::{io, thread, time};
 fn main() {
     println!("\nSolver initialized!\n");
 
-    println!("Please enter the name of the robot: \n(Available options are ur5, yumi, panda and iiwa7.)");
+    println!("Please enter the name of the robot: \n(Available options include baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5 and yumi.)");
     let mut name_buf = String::new();
     io::stdin().read_line(&mut name_buf).expect("Failed to read line");
     let name: String = name_buf.trim().to_string();

@@ -296,13 +296,18 @@ training_states:
 problem_states:
 boxes:
   - name: sawyer_stand_box
-    parameters: [0.7,0.4,0.9]
+    parameters: [0.75,0.4,1]
     coordinate_frame: 0
     rotation: [0,0,0]
-    translation: [-0.12,0.0,-0.45]
+    translation: [-0.2,0.0,-0.6]
+  - name: sawyer_stand_box
+    parameters: [0.75,0.4,1]
+    coordinate_frame: 0
+    rotation: [0,0,0]
+    translation: [-0.2,0.0,-0.6]
 spheres:
 ellipsoids:
-  - name: sawyer_ee
+  - name: sawyeree
     parameters: [.07,.07,.07]
     coordinate_frame: 9
     rotation: [0,0,0]

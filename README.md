@@ -20,10 +20,10 @@ If you plan to extend any of the Rust code, we recommend using the Jetbrains rus
 	```
 	cargo run --bin relaxed_ik_bin
 	```
-3. Follow the prompt in the console to test pre-generated robot configuration files.
+3. Follow the prompt in the console to test pre-generated robot configuration files. Available robots include baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5 and yumi.
 4. The joint angle solutions printed to the console should converge after a few seconds of running.
 
-## Test
+<!-- ## Test
 1. Run the regression tests by running:
 	```
 	cargo test --test regression_test -- --nocapture
@@ -34,7 +34,4 @@ If you plan to extend any of the Rust code, we recommend using the Jetbrains rus
 	```
 3. All available pre-computed robots will be tested automatically during the regression test
 4. Test outputs will be generated at `relaxed_ik_core/tests/[robot_name]/output`, and they are compared with expected outputs at `relaxed_ik_core/tests/[robot_name]/expected`
-5. Note that the expected outputs are retrieved from `/rosout` when running relaxed_ik with the same robot, configurations and inputs on ROS Melodic, Ubuntu 18.04. The tests may fail at a different operating system such as windows.
-
-## Known Issues
-1. The config files of these robot arms should be updated.
+5. Note that the expected outputs are retrieved from `/rosout` when running relaxed_ik with the same robot, configurations and inputs on ROS Melodic, Ubuntu 18.04. The tests may fail at a different operating system such as windows. -->
