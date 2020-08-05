@@ -1,5 +1,6 @@
 use crate::relaxed_ik;
 use crate::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
+use crate::utils_rust::file_utils::{*};
 use std::sync::{Arc, Mutex};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use std::io::{self, Write};
@@ -11,6 +12,11 @@ pub unsafe extern "C" fn run_coppeliasim(pos_arr: *const c_double, pos_length: c
     quat_arr: *const c_double, quat_length: c_int) -> relaxed_ik::Opt {
     assert!(!pos_arr.is_null(), "Null pointer for pos goals");
     assert!(!quat_arr.is_null(), "Null pointer for quat goals");
+
+    // let root_str: String = get_path_to_src().replace("/..", "") + "relaxed_ik_coppeliasim/relaxed_ik_core";
+    // let root = std::path::Path::new(&root_str);
+    // println!("{:?}", root);
+    // assert!(std::env::set_current_dir(&root).is_ok());
 
     let pos_slice: &[c_double] = std::slice::from_raw_parts(pos_arr, pos_length as usize);
     let quat_slice: &[c_double] = std::slice::from_raw_parts(quat_arr, quat_length as usize);
