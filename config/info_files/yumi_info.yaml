@@ -1,9 +1,9 @@
 urdf_file_name: "yumi.urdf"
-fixed_frame: "base_link"
+fixed_frame: "yumi_base_link"
 joint_names: [ [ "yumi_joint_1_r", "yumi_joint_2_r", "yumi_joint_7_r", "yumi_joint_3_r", "yumi_joint_4_r", "yumi_joint_5_r", "yumi_joint_6_r" ], [ "yumi_joint_1_l", "yumi_joint_2_l", "yumi_joint_7_l", "yumi_joint_3_l", "yumi_joint_4_l", "yumi_joint_5_l", "yumi_joint_6_l" ] ]
 joint_ordering: [ "yumi_joint_1_r", "yumi_joint_2_r", "yumi_joint_7_r", "yumi_joint_3_r", "yumi_joint_4_r", "yumi_joint_5_r", "yumi_joint_6_r", "yumi_joint_1_l", "yumi_joint_2_l", "yumi_joint_7_l", "yumi_joint_3_l", "yumi_joint_4_l", "yumi_joint_5_l", "yumi_joint_6_l" ]
 ee_fixed_joints: [ "gripper_r_joint", "gripper_l_joint" ]
-starting_config: [0.9422578845910441, -1.3322028367289023, -0.48524516528565, 0.12047658761064817, 0.3441789284930401, -0.0007120943387080025, -0.42685866581907606, -0.9704903305712997, -1.3322028367289023, 0.48524516528565, 0.12047658761064817, -0.3441789284930401, -0.0007120943387080025, 0.4268586658190756]
+starting_config: [0.9422578845910441, -1.3322028367289023, -0.48524516528565, 0.12047658761064817, 0.3441789284930401, -0.0007120943387080025, -0.42685866581907606, -0.9422578845910441, -1.3322028367289023, 0.48524516528565, 0.12047658761064817, -0.3441789284930401, -0.0007120943387080025, 0.42685866581907606]
 collision_file_name: "collision_yumi.yaml"
 collision_nn_file: "yumi_nn"
 path_to_src: "/home/rakita/catkin_ws/src/relaxed_ik/src"
