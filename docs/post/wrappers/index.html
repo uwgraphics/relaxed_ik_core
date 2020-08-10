@@ -128,23 +128,40 @@ body {
 
 <h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
 
-<p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</p>
-
-<p>This is a cleaner version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link instead <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version. In the complete version, you will have the opportunity to (and have to) set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc. The complete version is recommended if you would like to work on the configuration process yourself or a robot that we didn&rsquo;t include in the available options; otherwise, this wrapper is likely to make your life much easier since everything you need to do will be setting the name of the robot you would like to work with.</p>
-
-<p>Please refer to the README in the repo for more infomation.</p>
+<ul>
+<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</li>
+<li>This is a lighter-weight version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link instead <a href="https://github.com/uwgraphics/relaxed_ik">relaxed_ik</a> for the complete version. In the complete version, you will have the opportunity to (and have to) set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc. The complete version is recommended if you would like to work on the configuration process yourself or a robot that we didn&rsquo;t include in the available options; otherwise, this wrapper is likely to make your life much easier since everything you need to do will be setting the name of the robot you would like to work with.</li>
+<li>Please refer to the README in the repo for more infomation.</li>
+</ul>
 
 <h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
 
-<p>Under developed at <a href="https://github.com/uwgraphics/relaxed_ik_ros2">relaxed_ik_ros2</a>.</p>
+<ul>
+<li>This is RelaxedIK wrapped up in ROS2.</li>
+</ul>
 
-<p>This is RelaxedIK wrapped up in ROS2.</p>
+<h3 id="relaxed-ik-coppeliasim">Relaxed IK CoppeliaSim</h3>
+
+<ul>
+<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">relaxed_ik_coppeliasim</a>.</li>
+<li>This is a RelaxedIK plugin for CoppeliaSim. Although it&rsquo;s possible to use RelaxedIK in CoppeliaSim via ROS and the ROS wrapper of RelaxedIK at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That&rsquo;s why we developed this wrapper.</li>
+<li>Please refer to the README in the repo for more infomation.</li>
+</ul>
+
+<h3 id="relaxed-ik-mujoco">Relaxed IK Mujoco</h3>
+
+<ul>
+<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_mujoco">relaxed_ik_mujoco</a>.</li>
+<li>This is a RelaxedIK wrapper for Mujoco.</li>
+<li>Please refer to the README in the repo for more infomation.</li>
+</ul>
 
 <h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
 
-<p>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</p>
-
-<p>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:</p>
+<ul>
+<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</li>
+<li>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:</li>
+</ul>
 
 <p><img src="images/unity1.png" alt="Unity screenshot1" width="100%"/></p>
 
@@ -154,7 +171,9 @@ body {
 
 <p style="text-align:center; padding-bottom:10px">(2) Unity RelaxedIK enabled</p>
 
-<p>Please refer to the README in the repo for more infomation.</p>
+<ul>
+<li>Please refer to the README in the repo for more infomation.</li>
+</ul>
 
         </div>
     </div>

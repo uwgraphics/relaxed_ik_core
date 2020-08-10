@@ -56,7 +56,7 @@ A:</description>
       
       <guid>/post/wrappers/</guid>
       <description>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect it to different interfaces. Here are three wrappers that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in their README.
-Relaxed IK ROS Available at relaxed_ik_ros1.</description>
+Relaxed IK ROS  Available at relaxed_ik_ros1.</description>
     </item>
     
   </channel>
