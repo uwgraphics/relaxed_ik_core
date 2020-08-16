@@ -15,3 +15,4 @@ disp_offsets: [ [0.0,0.0,0.0] ]
 rot_offsets: [ [ [0.0,0.0,0.0], [0.0,0.0,0.0], [-1.57079632679,1.57079632679,0.0], [1.57079632679,0.0,0.0], [-1.57079632679,0.0,0.0], [1.57079632679,0.0,0.0], [-1.57079632679,0.0,0.0], [-1.57079632679,-0.17453,3.1416], [0.0,0.0,1.570796] ] ]
 joint_types: [ [ "fixed", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute" ] ]
 joint_state_define_func_file: "sawyer_joint_state_define"
+env_collision_file_name: "env_collision_sawyer.yaml"

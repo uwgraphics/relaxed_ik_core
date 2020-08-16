@@ -1,5 +1,5 @@
 use nalgebra::{UnitQuaternion, Vector3, Quaternion};
-use crate::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser};
+use crate::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser, RobotCollisionSpecFileParser};
 use crate::spacetime::robot::Robot;
 use crate::groove::collision_nn::CollisionNN;
 use crate::utils_rust::sampler::ThreadRobotSampler;
@@ -42,7 +42,8 @@ pub struct RelaxedIKVars {
     pub init_ee_quats: Vec<UnitQuaternion<f64>>,
     pub position_mode_relative: bool, // if false, will be absolute
     pub rotation_mode_relative: bool, // if false, will be absolute
-    pub collision_nn: CollisionNN
+    pub collision_nn: CollisionNN,
+    pub env_collision: RobotCollisionSpecFileParser,
 }
 impl RelaxedIKVars {
     pub fn from_yaml_path(fp: String, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
@@ -65,9 +66,13 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
+        let env_collision_path = get_path_to_src() + "relaxed_ik_core/config/env_collision_files/" + ifp.env_collision_file_name.as_str();
+        let env_collision = RobotCollisionSpecFileParser::from_yaml_path(env_collision_path);
+
         RelaxedIKVars{robot, sampler, init_state: ifp.starting_config.clone(), xopt: ifp.starting_config.clone(),
             prev_state: ifp.starting_config.clone(), prev_state2: ifp.starting_config.clone(), prev_state3: ifp.starting_config.clone(),
-            goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, collision_nn}
+            goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, collision_nn, 
+            env_collision}
     }
 
     pub fn from_yaml_path_with_init(fp: String, init_state: Vec<f64>, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
@@ -99,11 +104,14 @@ impl RelaxedIKVars {
 
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
+        
+        let env_collision_path = get_path_to_src() + "relaxed_ik_core/config/env_collision_files/" + "env_collision_ur5" + ".yaml";
+        let env_collision = RobotCollisionSpecFileParser::from_yaml_path(env_collision_path);
 
         RelaxedIKVars{robot, sampler, init_state: init_state.clone(), xopt: init_state.clone(),
             prev_state: init_state.clone(), prev_state2: init_state.clone(), prev_state3: init_state.clone(),
-            goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, collision_nn}
-
+            goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, 
+            collision_nn, env_collision}
     }
 
     pub fn update(&mut self, xopt: Vec<f64>) {

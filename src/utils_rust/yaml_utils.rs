@@ -33,6 +33,7 @@ pub struct InfoFileParser {
     pub rot_offsets: Vec<Vec<Vec<f64>>>,
     pub joint_types: Vec<Vec<String>>,
     pub joint_state_define_func_file: String,
+    pub env_collision_file_name: String,
 }
 impl InfoFileParser {
     pub fn from_yaml_path(fp: String) -> InfoFileParser {
@@ -137,9 +138,10 @@ impl InfoFileParser {
             }
         }
 
+        let env_collision_file_name = String::from(doc["env_collision_file_name"].as_str().unwrap());
 
         InfoFileParser{urdf_file_name, fixed_frame, joint_names, joint_ordering, ee_fixed_joints, starting_config, collision_file_name, collision_nn_file, path_to_src, axis_types, velocity_limits,
-            joint_limits, displacements, disp_offsets, rot_offsets, joint_types, joint_state_define_func_file}
+            joint_limits, displacements, disp_offsets, rot_offsets, joint_types, joint_state_define_func_file, env_collision_file_name}
     }
 }
 
@@ -263,7 +265,7 @@ impl RobotCollisionSpecFileParser {
                 let y_halflength = params[1].as_f64().unwrap();
                 let z_halflength = params[2].as_f64().unwrap();
 
-                let coordinate_frame = cuboids_list[i]["coordinate_frame"].as_str().unwrap().to_string();
+                let coordinate_frame = cuboids_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
 
                 let rots = cuboids_list[i]["rotation"].as_vec().unwrap();
                 let rx = rots[0].as_f64().unwrap();
@@ -287,7 +289,7 @@ impl RobotCollisionSpecFileParser {
                 let name = spheres_list[i]["name"].as_str().unwrap().to_string();
                 let radius = spheres_list[i]["parameters"].as_f64().unwrap();
 
-                let coordinate_frame = spheres_list[i]["coordinate_frame"].as_str().unwrap().to_string();
+                let coordinate_frame = spheres_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
 
                 let ts = spheres_list[i]["translation"].as_vec().unwrap();
                 let tx = ts[0].as_f64().unwrap();

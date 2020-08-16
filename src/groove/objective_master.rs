@@ -27,9 +27,11 @@ impl ObjectiveMaster {
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
-            weight_priors.push(10.0);
+            weight_priors.push(1.0);
             objectives.push(Box::new(MatchEEQuatGoals::new(i)));
-            weight_priors.push(9.0);
+            weight_priors.push(1.0);
+            objectives.push(Box::new(EnvCollision::new(i)));
+            weight_priors.push(1.0);
         }
         objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(7.0);
         objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(2.0);
@@ -37,7 +39,7 @@ impl ObjectiveMaster {
         objectives.push(Box::new(JointLimits));    weight_priors.push(1.0);
         objectives.push(Box::new(NNSelfCollision));    weight_priors.push(1.0);
 
-        Self{objectives, num_chains, weight_priors, lite: true, finite_diff_grad: true} // fix this
+        Self{objectives, num_chains, weight_priors, lite: false, finite_diff_grad: true} // fix this
     }
 
     pub fn call(&self, x: &[f64], vars: &RelaxedIKVars) -> f64 {
