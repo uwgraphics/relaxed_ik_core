@@ -175,8 +175,7 @@ impl ObjectiveTrait for EnvCollision {
                 let start_pt = nalgebra::Point3::from(frames[self.arm_idx].0[j]);
                 let end_pt = nalgebra::Point3::from(frames[self.arm_idx].0[j + 1]);
                 let link_len = nalgebra::distance(&start_pt, &end_pt);
-                let dot = (end_pt - start_pt).dot(&(collision_pt - start_pt));
-                let param = dot / link_len.powi(2);
+                let param = (end_pt - start_pt).dot(&(collision_pt - start_pt)) / link_len.powi(2);
                 let mut dis;
                 if param <= 0.0 {
                     dis = nalgebra::distance(&start_pt, &collision_pt);
