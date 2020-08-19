@@ -6,8 +6,6 @@ use std::cmp;
 use crate::groove::vars::RelaxedIKVars;
 use nalgebra::{Vector3, Isometry3, Point3};
 use ncollide3d::{shape, query};
-use std::ops::Deref;
-use std::sync::{Arc, Mutex};
 
 pub fn groove_loss(x_val: f64, t: f64, d: i32, c: f64, f: f64, g: i32) -> f64 {
     -( (-(x_val - t).powi(d)) / (2.0 * c.powi(2) ) ).exp() + f * (x_val - t).powi(g)
@@ -142,20 +140,7 @@ impl EnvCollision {
 }
 impl ObjectiveTrait for EnvCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
-        let mut sum_max: f64 = 0.0;
-        // initialize the collision world
-        let arc = Arc::new(Mutex::new(v.env_collision));
-        let arc2 = arc.clone();
-        let mut world = arc2.lock().unwrap();
-        update_collision_world(world, &v.link_handles, frames, self.arm_idx);
-        
-        for event in v.env_collision.proximity_events() {
-            let collider = handle_proximity_event(&v.env_collision, event).unwrap();
-            let sum = calculate_dis_sum(collider.position(), collider.shape().deref(), frames, self.arm_idx, v.link_radius);
-            sum_max = sum_max.max(sum);
-        }
-        v.env_collision.update();
-        
+        let sum_max = v.dis_sum_max[self.arm_idx];
         // println!("Sum Max: {}", sum_max);
         groove_loss(sum_max, 0., 2, 2.1, 0.0002, 4)
     }

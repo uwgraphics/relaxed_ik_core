@@ -1,10 +1,10 @@
 robot_link_radius: 0.05
 boxes:
-  - name: plane1
-    parameters: [0.35,0.6,0.002]
-    coordinate_frame: 0
-    rotation: [0.0,0.0,0.0]
-    translation: [0.6,0.0,0.15]
+  # - name: plane1
+  #   parameters: [0.35,0.6,0.002]
+  #   coordinate_frame: 0
+  #   rotation: [0.0,0.0,0.0]
+  #   translation: [0.6,0.0,0.15]
   # - name: plane2
   #   parameters: [0.35,0.6,0.002]
   #   coordinate_frame: 0

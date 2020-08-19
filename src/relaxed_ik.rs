@@ -6,7 +6,6 @@ use crate::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use crate::utils_rust::transformations::{*};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use crate::utils_rust::sampler::ThreadSampler;
-
 use std::os::raw::{c_double, c_int};
 
 #[repr(C)]
@@ -67,6 +66,7 @@ impl RelaxedIK {
         self.groove.optimize(&mut out_x, &self.vars, &self.om, 100);
 
         self.vars.update(out_x.clone());
+        self.vars.update_collision_world();
 
         out_x
     }
@@ -123,6 +123,7 @@ impl RelaxedIK {
         }
 
         self.vars.update(out_x.clone());
+        self.vars.update_collision_world();
 
         out_x
     }
