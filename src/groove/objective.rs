@@ -1,10 +1,13 @@
 use crate::groove::{vars, tools};
+use crate::groove::env_collision::{*};
 use crate::utils_rust::transformations::{*};
 use nalgebra::geometry::{Translation3, UnitQuaternion, Quaternion};
 use std::cmp;
 use crate::groove::vars::RelaxedIKVars;
 use nalgebra::{Vector3, Isometry3, Point3};
 use ncollide3d::{shape, query};
+use std::ops::Deref;
+use std::sync::{Arc, Mutex};
 
 pub fn groove_loss(x_val: f64, t: f64, d: i32, c: f64, f: f64, g: i32) -> f64 {
     -( (-(x_val - t).powi(d)) / (2.0 * c.powi(2) ) ).exp() + f * (x_val - t).powi(g)
@@ -139,59 +142,19 @@ impl EnvCollision {
 }
 impl ObjectiveTrait for EnvCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
-        let link_radius = v.env_collision.robot_link_radius;
-        let penalty_cutoff: f64 = link_radius / 2.0;
-        // println!("Penalty: {}", penalty_cutoff);
-        let a = 0.005 * (penalty_cutoff.powi(10));
-        let planes = &v.env_collision.cuboids;
-        let spheres = &v.env_collision.spheres;
         let mut sum_max: f64 = 0.0;
-        let last_elem = frames[self.arm_idx].0.len() - 1;
-        // println!("Frames: {:?}", frames[self.arm_idx]);
-        for i in 0..planes.len() {
-            let plane = shape::Cuboid::new(Vector3::new(planes[i].x_halflength, planes[i].y_halflength, planes[i].z_halflength));
-            let plane_ts = Translation3::new(planes[i].tx, planes[i].ty, planes[i].tz);
-            let plane_rot = UnitQuaternion::from_euler_angles(planes[i].rx, planes[i].ry, planes[i].rz);
-            let plane_pos = Isometry3::from_parts(plane_ts, plane_rot);
-            let mut sum: f64 = 0.0;
-            for j in 0..last_elem {
-                let start_pt = Point3::from(frames[self.arm_idx].0[j]);
-                let end_pt = Point3::from(frames[self.arm_idx].0[j + 1]);
-                let segment = shape::Segment::new(start_pt, end_pt);
-                let segment_pos = nalgebra::one();
-                let dis = query::distance(&plane_pos, &plane, &segment_pos, &segment) - link_radius;
-                // println!("Link: {}, Distance: {:?}", j, dis);
-                sum += a / dis.powi(10); 
-            }
+        // initialize the collision world
+        let arc = Arc::new(Mutex::new(v.env_collision));
+        let arc2 = arc.clone();
+        let mut world = arc2.lock().unwrap();
+        update_collision_world(world, &v.link_handles, frames, self.arm_idx);
+        
+        for event in v.env_collision.proximity_events() {
+            let collider = handle_proximity_event(&v.env_collision, event).unwrap();
+            let sum = calculate_dis_sum(collider.position(), collider.shape().deref(), frames, self.arm_idx, v.link_radius);
             sum_max = sum_max.max(sum);
         }
-
-        for i in 0..spheres.len() {
-            let collision_pt = nalgebra::Point3::new(spheres[i].tx, spheres[i].ty, spheres[i].tz);
-            let obs_r = spheres[i].radius;
-            // println!("Point: {:?}, radius: {}", collision_pt, obs_r);
-            let mut sum: f64 = 0.0;
-            for j in 0..last_elem {
-                let start_pt = nalgebra::Point3::from(frames[self.arm_idx].0[j]);
-                let end_pt = nalgebra::Point3::from(frames[self.arm_idx].0[j + 1]);
-                let link_len = nalgebra::distance(&start_pt, &end_pt);
-                let param = (end_pt - start_pt).dot(&(collision_pt - start_pt)) / link_len.powi(2);
-                let mut dis;
-                if param <= 0.0 {
-                    dis = nalgebra::distance(&start_pt, &collision_pt);
-                } else if param >= 1.0 {
-                    dis = nalgebra::distance(&end_pt, &collision_pt);
-                } else {
-                    let cross_product = (start_pt - end_pt).cross(&(start_pt - collision_pt));
-                    dis = nalgebra::Matrix::magnitude(&cross_product) / link_len;
-                }
-                dis = dis - obs_r - link_radius;
-                // println!("Link: {} Start: {:?} End: {:?} Length: {:?} Param: {:?} Distance: {:?}", j, start_pt, end_pt, link_len, param, dis);
-                sum += a / dis.powi(10); 
-            }
-            // println!("Obstacle: {}, Sum: {}", i, sum);
-            sum_max = sum_max.max(sum);
-        }
+        v.env_collision.update();
         
         // println!("Sum Max: {}", sum_max);
         groove_loss(sum_max, 0., 2, 2.1, 0.0002, 4)
