@@ -35,7 +35,7 @@ fn solve_helper(pos_goals: Vec<f64>, quat_goals: Vec<f64>) -> Vec<f64> {
     R.with(|r| {
         for i in 0..(*r.borrow()).vars.robot.num_chains {
             g.pos_goals.push( Vector3::new(pos_goals[3*i], pos_goals[3*i+1], pos_goals[3*i+2]) );
-            let tmp_q = Quaternion::new(quat_goals[3*i+3], quat_goals[3*i], quat_goals[3*i+1], quat_goals[3*i+2]);
+            let tmp_q = Quaternion::new(quat_goals[4*i+3], quat_goals[4*i], quat_goals[4*i+1], quat_goals[4*i+2]);
             g.quat_goals.push( UnitQuaternion::from_quaternion(tmp_q) );
         }
     
