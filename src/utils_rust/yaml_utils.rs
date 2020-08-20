@@ -249,6 +249,7 @@ impl RobotCollisionSpecFileParser {
         let doc = &docs[0];
         let mut cuboids_option = doc["boxes"].as_vec();
         let mut spheres_option = doc["spheres"].as_vec();
+        let mut sphere_lists_option = doc["sphere_lists"].as_vec();
 
         let robot_link_radius = doc["robot_link_radius"].as_f64().unwrap();
 
@@ -297,6 +298,32 @@ impl RobotCollisionSpecFileParser {
                 let tz = ts[2].as_f64().unwrap();
 
                 spheres.push(Sphere::new(name, radius, coordinate_frame, tx, ty, tz));
+            }
+        }
+
+        if sphere_lists_option.is_some() {
+            let sphere_lists_list = sphere_lists_option.unwrap();
+            let l = sphere_lists_list.len();
+
+            for i in 0..l {
+                let name = sphere_lists_list[i]["name"].as_str().unwrap().to_string();
+                let radius = sphere_lists_list[i]["parameters"].as_f64().unwrap();
+
+                let coordinate_frame = sphere_lists_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
+
+                let ts = sphere_lists_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let positions = sphere_lists_list[i]["points"].as_vec().unwrap();
+                for p in positions {
+                    let pos = p.as_vec().unwrap();
+                    let x = pos[0].as_f64().unwrap();
+                    let y = pos[1].as_f64().unwrap();
+                    let z = pos[2].as_f64().unwrap();
+                    spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + x, ty + y, tz + z));
+                }
             }
         }
 

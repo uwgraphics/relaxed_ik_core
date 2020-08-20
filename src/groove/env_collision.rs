@@ -5,15 +5,17 @@ use ncollide3d::pipeline::{*};
 use ncollide3d::shape::{*};
 use ncollide3d::query::{*};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CollisionObjectData {
+    pub name: String,
     pub is_link: bool,
     pub arm_idx: i32,
 }
 
 impl CollisionObjectData {
-    pub fn new(is_link: bool, arm_idx: i32) -> CollisionObjectData {
+    pub fn new(name: String, is_link: bool, arm_idx: i32) -> CollisionObjectData {
         Self {
+            name: name,
             is_link: is_link,
             arm_idx: arm_idx,
         }
@@ -22,8 +24,9 @@ impl CollisionObjectData {
 
 pub struct RelaxedIKEnvCollision {
     pub world: CollisionWorld<f64, CollisionObjectData>,
-    pub link_handles: Vec<CollisionObjectSlabHandle>,
+    pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub link_radius: f64,
+    pub active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>>,
 }
 
 impl RelaxedIKEnvCollision {
@@ -51,29 +54,31 @@ impl RelaxedIKEnvCollision {
         others_groups.set_blacklist(&[2]);
         others_groups.set_whitelist(&[1]);
 
-        
-        let plane_data = CollisionObjectData::new(false, -1);
-        let sphere_data = CollisionObjectData::new(false, -1);
-
-        let proximity_query = GeometricQueryType::Proximity(link_radius);
+        let proximity_query = GeometricQueryType::Proximity(2.0 * link_radius);
 
         let mut world = CollisionWorld::new(0.0);
-        let mut link_handles: Vec<CollisionObjectSlabHandle> = Vec::new();
+        let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
+        let mut active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>> = Vec::new();
         for arm_idx in 0..frames.len() {
+            let mut handles: Vec<CollisionObjectSlabHandle> = Vec::new();
+            let pair: Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)> = Vec::new();
             let last_elem = frames[arm_idx].0.len() - 1;
             for i in 0..last_elem {
                 let start_pt = Point3::from(frames[arm_idx].0[i]);
                 let end_pt = Point3::from(frames[arm_idx].0[i + 1]);
                 let segment = ShapeHandle::new(Segment::new(start_pt, end_pt));
                 let segment_pos = nalgebra::one();
-                let link_data = CollisionObjectData::new(true, arm_idx as i32);
+                let link_data = CollisionObjectData::new(format!("Link {}", i), true, arm_idx as i32);
                 let handle = world.add(segment_pos, segment, link_groups, proximity_query, link_data);
-                link_handles.push(handle.0);
+                handles.push(handle.0);
             }
+            link_handles.push(handles);
+            active_pairs.push(pair);
         }
         // let mut planes = Vec::new();
         // let mut planes_pos = Vec::new();
-        for plane_obs in plane_obstacles {
+        for i in 0..plane_obstacles.len() {
+            let plane_obs = &plane_obstacles[i];
             let half_extents = Vector3::new(plane_obs.x_halflength, plane_obs.y_halflength, plane_obs.z_halflength);
             let plane = ShapeHandle::new(Cuboid::new(half_extents));
             let plane_ts = Translation3::new(plane_obs.tx, plane_obs.ty, plane_obs.tz);
@@ -81,90 +86,43 @@ impl RelaxedIKEnvCollision {
             let plane_pos = Isometry3::from_parts(plane_ts, plane_rot);
             // planes.push(plane);
             // planes_pos.push(plane_pos);
-            world.add(plane_pos, plane, others_groups, proximity_query, plane_data.clone());
+            let plane_data = CollisionObjectData::new(format!("Plane {}", i + 1), false, -1);
+            world.add(plane_pos, plane, others_groups, proximity_query, plane_data);
         }
 
         // let mut spheres = Vec::new();
         // let mut spheres_pos = Vec::new();
-        for sphere_obs in sphere_obstacles {
+        for i in 0..sphere_obstacles.len() {
+            let sphere_obs = &sphere_obstacles[i];
             let sphere = ShapeHandle::new(Ball::new(sphere_obs.radius));
             let sphere_ts = Translation3::new(sphere_obs.tx, sphere_obs.ty, sphere_obs.tz);
             let sphere_rot = UnitQuaternion::identity();
             let sphere_pos = Isometry3::from_parts(sphere_ts, sphere_rot);
             // spheres.push(sphere);
             // spheres_pos.push(sphere_pos);
-            // let sphere_handle = 
-            world.add(sphere_pos, sphere, others_groups, proximity_query, sphere_data.clone());
+            let sphere_data = CollisionObjectData::new(format!("Sphere {}", i + 1), false, -1);
+            world.add(sphere_pos, sphere, others_groups, proximity_query, sphere_data);
         }
 
         // Register our handlers.
         // world.register_proximity_handler("ProximityMessage", ProximityMessage);
 
-        return Self{world, link_handles, link_radius};
+        return Self{world, link_handles, link_radius, active_pairs};
     }
 
-    pub fn update_collision_world (
+    pub fn update_collision_world(
         &mut self,
         frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>,
     ) {
         for arm_idx in 0..frames.len() {
-            let length = frames[arm_idx].0.len();
-            for i in 0..length - 1 {
+            let last_elem = frames[arm_idx].0.len() - 1;
+            for i in 0..last_elem {
                 let start_pt = Point3::from(frames[arm_idx].0[i]);
                 let end_pt = Point3::from(frames[arm_idx].0[i + 1]);
                 let segment = ShapeHandle::new(Segment::new(start_pt, end_pt));
-                let co = self.world.objects.get_mut(self.link_handles[arm_idx * length + i]).unwrap();
+                let co = self.world.objects.get_mut(self.link_handles[arm_idx][i]).unwrap();
                 co.set_shape(segment);
             }
-        }   
-    }
-
-    pub fn handle_proximity_event<'a> (
-        &'a self,
-        event: &ProximityEvent<CollisionObjectSlabHandle>,
-    ) -> Option<(usize, &'a CollisionObject<f64, CollisionObjectData>)> {
-        if event.new_status == Proximity::WithinMargin {
-            println!("WithinMargin");
-            let c1 = self.world.objects.get(event.collider1).unwrap();
-            let c2 = self.world.objects.get(event.collider2).unwrap();
-            if c1.data().is_link {
-                return Some((c1.data().arm_idx as usize, c2));
-            } else if c2.data().is_link {
-                return Some((c2.data().arm_idx as usize, c1));
-            } else {
-                return None;
-            }
-        } else if event.new_status == Proximity::Intersecting {
-            println!("Intersecting");
-            return None;
-        } else {
-            println!("Disjoint");
-            return None;
         }
     }
-}
-
-pub fn calculate_dis_sum (
-    obstacle_pos: &Isometry3<f64>, 
-    obstacle_shape: &dyn Shape<f64>,
-    frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>,
-    arm_idx: usize,
-    link_radius: f64, 
-) -> f64 {
-    println!("Obstacle pos: {:?}", obstacle_pos);
-    let penalty_cutoff: f64 = link_radius / 2.0;
-    let a = 0.005 * (penalty_cutoff.powi(10));
-    let mut sum: f64 = 0.0;
-    let last_elem = frames[arm_idx].0.len() - 1;
-    for i in 0..last_elem {
-        let start_pt = Point3::from(frames[arm_idx].0[i]);
-        let end_pt = Point3::from(frames[arm_idx].0[i + 1]);
-        let segment = Segment::new(start_pt, end_pt);
-        let segment_pos = nalgebra::one();
-        let dis = distance(obstacle_pos, obstacle_shape, &segment_pos, &segment) - link_radius;
-        println!("Link: {}, Distance: {:?}", i, dis);
-        sum += a / dis.powi(10); 
-    }
-    println!("Sum: {}", sum);
-    sum
 }
