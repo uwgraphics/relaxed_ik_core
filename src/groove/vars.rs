@@ -1,11 +1,14 @@
-use nalgebra::{UnitQuaternion, Vector3, Quaternion};
+use nalgebra::{UnitQuaternion, Vector3, Quaternion, Point3};
 use crate::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser, RobotCollisionSpecFileParser};
 use crate::spacetime::robot::Robot;
 use crate::groove::collision_nn::CollisionNN;
 use crate::utils_rust::sampler::ThreadRobotSampler;
 use crate::utils_rust::file_utils::{*};
 use crate::groove::env_collision::{*};
-use ncollide3d::query::Proximity;
+use ncollide3d::query::{*};
+use ncollide3d::shape::{*};
+use time::PreciseTime;
+use std::ops::Deref;
 
 #[derive(Clone, Debug)]
 pub struct Vars {
@@ -128,6 +131,7 @@ impl RelaxedIKVars {
     }
 
     pub fn update_collision_world(&mut self) {
+        let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
         self.env_collision.update_collision_world(&frames);
         for event in self.env_collision.world.proximity_events() {
@@ -142,14 +146,14 @@ impl RelaxedIKVars {
                     let pair = (event.collider2, event.collider1);
                     if !self.env_collision.active_pairs[arm_idx].contains(&pair) {
                         self.env_collision.active_pairs[arm_idx].push(pair);
-                        self.print_active_pairs();
+                        // self.print_active_pairs();
                     }
                 } else if c2.data().is_link {
                     let arm_idx = c2.data().arm_idx as usize;
                     let pair = (event.collider1, event.collider2);
                     if !self.env_collision.active_pairs[arm_idx].contains(&pair) {
                         self.env_collision.active_pairs[arm_idx].push(pair);
-                        self.print_active_pairs();
+                        // self.print_active_pairs();
                     }
                 }
             } else {
@@ -160,7 +164,7 @@ impl RelaxedIKVars {
                     if self.env_collision.active_pairs[arm_idx].contains(&pair) {
                         let index = self.env_collision.active_pairs[arm_idx].iter().position(|x| *x == pair).unwrap();
                         self.env_collision.active_pairs[arm_idx].remove(index);
-                        self.print_active_pairs();
+                        // self.print_active_pairs();
                     }
                 } else if c2.data().is_link {
                     let arm_idx = c2.data().arm_idx as usize;
@@ -168,13 +172,50 @@ impl RelaxedIKVars {
                     if self.env_collision.active_pairs[arm_idx].contains(&pair) {
                         let index = self.env_collision.active_pairs[arm_idx].iter().position(|x| *x == pair).unwrap();
                         self.env_collision.active_pairs[arm_idx].remove(index);
-                        self.print_active_pairs();
+                        // self.print_active_pairs();
                     }
                 } 
             }
         }
+
+        for arm_idx in 0..frames.len() {
+            let mut active_obstacles = Vec::new();
+            for i in 0..self.env_collision.active_pairs[arm_idx].len() {
+                if !active_obstacles.contains(&self.env_collision.active_pairs[arm_idx][i].0) {
+                    active_obstacles.push(self.env_collision.active_pairs[arm_idx][i].0);
+                }
+            }
+            // println!("Number of active obstacles: {}", active_obstacles.len());
+
+            let link_radius = self.env_collision.link_radius;
+            let penalty_cutoff: f64 = link_radius / 2.0;
+            let a = 0.005 * (penalty_cutoff.powi(10));
+            let mut sum_max: f64 = 0.0;
+            for i in 0..active_obstacles.len() {
+                let obstacle = self.env_collision.world.objects.get(active_obstacles[i]).unwrap();
+                // println!("Obstacle: {:?}", obstacle.data());
+                let mut sum: f64 = 0.0;
+                let last_elem = frames[arm_idx].0.len() - 1;
+                for j in 0..last_elem {
+                    let start_pt = Point3::from(frames[arm_idx].0[j]);
+                    let end_pt = Point3::from(frames[arm_idx].0[j + 1]);
+                    let segment = Segment::new(start_pt, end_pt);
+                    let segment_pos = nalgebra::one();
+                    let dis = distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
+                    // println!("Link: {}, Distance: {:?}", j, dis);
+                    sum += a / dis.powi(10); 
+                }
+                // println!("Sum: {}", sum);
+                if sum > sum_max {
+                    sum_max = sum;
+                    self.env_collision.nearest_obstacle[arm_idx] = Some(active_obstacles[i]);
+                }
+            }
+        }
         
         self.env_collision.world.update();
+        let end = PreciseTime::now();
+        println!("Update collision world takes {}", start.to(end));
     }
 
     pub fn print_active_pairs(&self) {

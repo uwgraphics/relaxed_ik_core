@@ -7,6 +7,7 @@ use crate::groove::vars::RelaxedIKVars;
 use nalgebra::{Vector3, Isometry3, Point3};
 use ncollide3d::{shape, query, pipeline};
 use std::ops::Deref;
+use time::PreciseTime;
 
 pub fn groove_loss(x_val: f64, t: f64, d: i32, c: f64, f: f64, g: i32) -> f64 {
     -( (-(x_val - t).powi(d)) / (2.0 * c.powi(2) ) ).exp() + f * (x_val - t).powi(g)
@@ -22,7 +23,7 @@ pub trait ObjectiveTrait {
     fn gradient(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> (f64, Vec<f64>) {
         let mut grad: Vec<f64> = Vec::new();
         let f_0 = self.call(x, v, frames);
-
+        
         for i in 0..x.len() {
             let mut x_h = x.to_vec();
             x_h[i] += 0.000000001;
@@ -141,37 +142,33 @@ impl EnvCollision {
 }
 impl ObjectiveTrait for EnvCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
-        let active_pairs = &v.env_collision.active_pairs[self.arm_idx];
-        let mut active_obstacles: Vec<pipeline::object::CollisionObjectSlabHandle> = Vec::new();
-        for i in 0..active_pairs.len() {
-            if !active_obstacles.contains(&active_pairs[i].0) {
-                active_obstacles.push(active_pairs[i].0);
-            }
+        // let start = PreciseTime::now();
+        let handle_option = v.env_collision.nearest_obstacle[self.arm_idx];
+        let mut sum: f64 = 0.0;
+        match handle_option {
+            Some(handle) => {
+                let obstacle = v.env_collision.world.objects.get(handle).unwrap();
+                let link_radius = v.env_collision.link_radius;
+                let penalty_cutoff: f64 = link_radius / 2.0;
+                let a = 0.005 * (penalty_cutoff.powi(10));
+                let last_elem = frames[self.arm_idx].0.len() - 1;
+                for i in 0..last_elem {
+                    let start_pt = Point3::from(frames[self.arm_idx].0[i]);
+                    let end_pt = Point3::from(frames[self.arm_idx].0[i + 1]);
+                    let segment = shape::Segment::new(start_pt, end_pt);
+                    let segment_pos = nalgebra::one();
+                    let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
+                    // println!("Link: {}, Distance: {:?}", j, dis);
+                    sum += a / dis.powi(10); 
+                }
+            },
+            None => {},
         }
-        let link_radius = v.env_collision.link_radius;
-        let penalty_cutoff: f64 = link_radius / 2.0;
-        let a = 0.005 * (penalty_cutoff.powi(10));
-        let mut sum_max: f64 = 0.0;
-        for i in 0..active_obstacles.len() {
-            let obstacle = v.env_collision.world.objects.get(active_obstacles[i]).unwrap();
-            // println!("Obstacle: {:?}", obstacle.data());
-            let mut sum: f64 = 0.0;
-            let last_elem = frames[self.arm_idx].0.len() - 1;
-            for j in 0..last_elem {
-                let start_pt = Point3::from(frames[self.arm_idx].0[j]);
-                let end_pt = Point3::from(frames[self.arm_idx].0[j + 1]);
-                let segment = shape::Segment::new(start_pt, end_pt);
-                let segment_pos = nalgebra::one();
-                let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
-                // println!("Link: {}, Distance: {:?}", j, dis);
-                sum += a / dis.powi(10); 
-            }
-            // println!("Sum: {}", sum);
-            sum_max = sum_max.max(sum);
-        }
+        
+        // let end = PreciseTime::now();
+        // println!("Obstacles calculating takes {}", start.to(end));
 
-        // println!("Sum Max: {}", sum_max);
-        groove_loss(sum_max, 0., 2, 2.1, 0.0002, 4)
+        groove_loss(sum, 0., 2, 2.1, 0.0002, 4)
     }
 
     fn call_lite(&self, x: &[f64], v: &vars::RelaxedIKVars, ee_poses: &Vec<(nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>)>) -> f64 {

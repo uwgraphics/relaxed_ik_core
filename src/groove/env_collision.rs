@@ -27,6 +27,7 @@ pub struct RelaxedIKEnvCollision {
     pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub link_radius: f64,
     pub active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>>,
+    pub nearest_obstacle: Vec<Option<CollisionObjectSlabHandle>>,
 }
 
 impl RelaxedIKEnvCollision {
@@ -54,11 +55,12 @@ impl RelaxedIKEnvCollision {
         others_groups.set_blacklist(&[2]);
         others_groups.set_whitelist(&[1]);
 
-        let proximity_query = GeometricQueryType::Proximity(2.0 * link_radius);
+        let proximity_query = GeometricQueryType::Proximity(1.0 * link_radius);
 
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
         let mut active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>> = Vec::new();
+        let mut nearest_obstacle: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
         for arm_idx in 0..frames.len() {
             let mut handles: Vec<CollisionObjectSlabHandle> = Vec::new();
             let pair: Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)> = Vec::new();
@@ -74,7 +76,9 @@ impl RelaxedIKEnvCollision {
             }
             link_handles.push(handles);
             active_pairs.push(pair);
+            nearest_obstacle.push(None);
         }
+
         // let mut planes = Vec::new();
         // let mut planes_pos = Vec::new();
         for i in 0..plane_obstacles.len() {
@@ -106,8 +110,8 @@ impl RelaxedIKEnvCollision {
 
         // Register our handlers.
         // world.register_proximity_handler("ProximityMessage", ProximityMessage);
-
-        return Self{world, link_handles, link_radius, active_pairs};
+        
+        return Self{world, link_handles, link_radius, active_pairs, nearest_obstacle};
     }
 
     pub fn update_collision_world(
