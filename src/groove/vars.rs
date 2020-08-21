@@ -5,6 +5,7 @@ use crate::groove::collision_nn::CollisionNN;
 use crate::utils_rust::sampler::ThreadRobotSampler;
 use crate::utils_rust::file_utils::{*};
 use crate::groove::env_collision::{*};
+use ncollide3d::pipeline::{*};
 use ncollide3d::query::{*};
 use ncollide3d::shape::{*};
 use time::PreciseTime;
@@ -131,7 +132,7 @@ impl RelaxedIKVars {
     }
 
     pub fn update_collision_world(&mut self) {
-        let start = PreciseTime::now();
+        // let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
         self.env_collision.update_collision_world(&frames);
         for event in self.env_collision.world.proximity_events() {
@@ -143,16 +144,22 @@ impl RelaxedIKVars {
                 println!("===== {:?} WithinMargin of {:?} =====", c1.data().name, c2.data().name);
                 if c1.data().is_link {
                     let arm_idx = c1.data().arm_idx as usize;
-                    let pair = (event.collider2, event.collider1);
-                    if !self.env_collision.active_pairs[arm_idx].contains(&pair) {
-                        self.env_collision.active_pairs[arm_idx].push(pair);
+                    if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
+                        self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap().push(event.collider1);
+                        // self.print_active_pairs();
+                    } else {
+                        let links: Vec<CollisionObjectSlabHandle> = vec![event.collider1];
+                        self.env_collision.active_pairs[arm_idx].insert(event.collider2, links);
                         // self.print_active_pairs();
                     }
                 } else if c2.data().is_link {
                     let arm_idx = c2.data().arm_idx as usize;
-                    let pair = (event.collider1, event.collider2);
-                    if !self.env_collision.active_pairs[arm_idx].contains(&pair) {
-                        self.env_collision.active_pairs[arm_idx].push(pair);
+                    if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
+                        self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap().push(event.collider2);
+                        // self.print_active_pairs();
+                    } else {
+                        let links: Vec<CollisionObjectSlabHandle> = vec![event.collider2];
+                        self.env_collision.active_pairs[arm_idx].insert(event.collider1, links);
                         // self.print_active_pairs();
                     }
                 }
@@ -160,18 +167,24 @@ impl RelaxedIKVars {
                 println!("===== {:?} Disjoint of {:?} =====", c1.data().name, c2.data().name);
                 if c1.data().is_link {
                     let arm_idx = c1.data().arm_idx as usize;
-                    let pair = (event.collider2, event.collider1);
-                    if self.env_collision.active_pairs[arm_idx].contains(&pair) {
-                        let index = self.env_collision.active_pairs[arm_idx].iter().position(|x| *x == pair).unwrap();
-                        self.env_collision.active_pairs[arm_idx].remove(index);
+                    if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
+                        let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap();
+                        let index = links.iter().position(|x| *x == event.collider1).unwrap();
+                        links.remove(index);
+                        if links.len() == 0 {
+                            self.env_collision.active_pairs[arm_idx].remove(&event.collider2);
+                        }
                         // self.print_active_pairs();
                     }
                 } else if c2.data().is_link {
                     let arm_idx = c2.data().arm_idx as usize;
-                    let pair = (event.collider1, event.collider2);
-                    if self.env_collision.active_pairs[arm_idx].contains(&pair) {
-                        let index = self.env_collision.active_pairs[arm_idx].iter().position(|x| *x == pair).unwrap();
-                        self.env_collision.active_pairs[arm_idx].remove(index);
+                    if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
+                        let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap();
+                        let index = links.iter().position(|x| *x == event.collider2).unwrap();
+                        links.remove(index);
+                        if links.len() == 0 {
+                            self.env_collision.active_pairs[arm_idx].remove(&event.collider1);
+                        }
                         // self.print_active_pairs();
                     }
                 } 
@@ -179,21 +192,14 @@ impl RelaxedIKVars {
         }
 
         for arm_idx in 0..frames.len() {
-            let mut active_obstacles = Vec::new();
-            for i in 0..self.env_collision.active_pairs[arm_idx].len() {
-                if !active_obstacles.contains(&self.env_collision.active_pairs[arm_idx][i].0) {
-                    active_obstacles.push(self.env_collision.active_pairs[arm_idx][i].0);
-                }
-            }
-            // println!("Number of active obstacles: {}", active_obstacles.len());
-
             let link_radius = self.env_collision.link_radius;
             let penalty_cutoff: f64 = link_radius / 2.0;
             let a = 0.005 * (penalty_cutoff.powi(10));
-            let mut sum_max: f64 = 0.0;
-            for i in 0..active_obstacles.len() {
-                let obstacle = self.env_collision.world.objects.get(active_obstacles[i]).unwrap();
-                // println!("Obstacle: {:?}", obstacle.data());
+            // let mut sum_max: f64 = 0.0;
+            let mut active_obstacles: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
+            for key in self.env_collision.active_pairs[arm_idx].keys() {
+                let obstacle = self.env_collision.world.objects.get(*key).unwrap();
+                println!("Obstacle: {:?}", obstacle.data());
                 let mut sum: f64 = 0.0;
                 let last_elem = frames[arm_idx].0.len() - 1;
                 for j in 0..last_elem {
@@ -206,25 +212,28 @@ impl RelaxedIKVars {
                     sum += a / dis.powi(10); 
                 }
                 // println!("Sum: {}", sum);
-                if sum > sum_max {
-                    sum_max = sum;
-                    self.env_collision.nearest_obstacle[arm_idx] = Some(active_obstacles[i]);
+                if sum > 0.02 {
+                    active_obstacles.push(Some(*key));
                 }
             }
+            println!("Number of active obstacles: {}", active_obstacles.len());
+            self.env_collision.nearest_obstacles[arm_idx] = active_obstacles;
         }
         
         self.env_collision.world.update();
-        let end = PreciseTime::now();
-        println!("Update collision world takes {}", start.to(end));
+        // let end = PreciseTime::now();
+        // println!("Update collision world takes {}", start.to(end));
     }
 
     pub fn print_active_pairs(&self) {
         let frames = self.robot.get_frames_immutable(&self.xopt);
         for i in 0..frames.len() {
-            for j in 0..self.env_collision.active_pairs[i].len() {
-                let collider = self.env_collision.world.objects.get(self.env_collision.active_pairs[i][j].0).unwrap();
-                let link = self.env_collision.world.objects.get(self.env_collision.active_pairs[i][j].1).unwrap();
-                println!("Arm {}, Active pair {:?} and {:?}", i, collider.data().name, link.data().name);
+            for (key, values) in self.env_collision.active_pairs[i].iter() {
+                let collider = self.env_collision.world.objects.get(*key).unwrap();
+                for v in values {
+                    let link = self.env_collision.world.objects.get(*v).unwrap();
+                    println!("Arm {}, Active pair {:?} and {:?}", i, collider.data().name, link.data().name);
+                }
             }
         }
     }

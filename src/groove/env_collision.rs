@@ -4,6 +4,7 @@ use nalgebra::geometry::{Translation3, UnitQuaternion, Quaternion};
 use ncollide3d::pipeline::{*};
 use ncollide3d::shape::{*};
 use ncollide3d::query::{*};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 pub struct CollisionObjectData {
@@ -26,8 +27,8 @@ pub struct RelaxedIKEnvCollision {
     pub world: CollisionWorld<f64, CollisionObjectData>,
     pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub link_radius: f64,
-    pub active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>>,
-    pub nearest_obstacle: Vec<Option<CollisionObjectSlabHandle>>,
+    pub active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>>,
+    pub nearest_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>>,
 }
 
 impl RelaxedIKEnvCollision {
@@ -59,11 +60,12 @@ impl RelaxedIKEnvCollision {
 
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
-        let mut active_pairs: Vec<Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)>> = Vec::new();
-        let mut nearest_obstacle: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
+        let mut active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>> = Vec::new();
+        let mut nearest_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>> = Vec::new();
         for arm_idx in 0..frames.len() {
             let mut handles: Vec<CollisionObjectSlabHandle> = Vec::new();
-            let pair: Vec<(CollisionObjectSlabHandle, CollisionObjectSlabHandle)> = Vec::new();
+            let mut obstacles: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
+            let pair: BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>> = BTreeMap::new();
             let last_elem = frames[arm_idx].0.len() - 1;
             for i in 0..last_elem {
                 let start_pt = Point3::from(frames[arm_idx].0[i]);
@@ -73,10 +75,11 @@ impl RelaxedIKEnvCollision {
                 let link_data = CollisionObjectData::new(format!("Link {}", i), true, arm_idx as i32);
                 let handle = world.add(segment_pos, segment, link_groups, proximity_query, link_data);
                 handles.push(handle.0);
+                obstacles.push(None);
             }
             link_handles.push(handles);
             active_pairs.push(pair);
-            nearest_obstacle.push(None);
+            nearest_obstacles.push(obstacles);
         }
 
         // let mut planes = Vec::new();
@@ -111,7 +114,7 @@ impl RelaxedIKEnvCollision {
         // Register our handlers.
         // world.register_proximity_handler("ProximityMessage", ProximityMessage);
         
-        return Self{world, link_handles, link_radius, active_pairs, nearest_obstacle};
+        return Self{world, link_handles, link_radius, active_pairs, nearest_obstacles};
     }
 
     pub fn update_collision_world(
