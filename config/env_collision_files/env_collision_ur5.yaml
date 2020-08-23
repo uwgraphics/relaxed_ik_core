@@ -28,10 +28,17 @@ spheres:
   #   coordinate_frame: 0
   #   translation: [0.6,-0.1,0.6]
 point_cloud:
-  - name: pcd1
-    parameters: 0.1
+  # - name: pcd1
+  #   parameters: 0.001
+  #   coordinate_frame: 0
+  #   scale: [4.0,4.0,4.0]
+  #   rotation: [1.57,0.0,-1.57]
+  #   translation: [0.8,-0.1,0.05]
+  #   file: bunny.pcd
+  - name: pcd2
+    parameters: 0.001
     coordinate_frame: 0
-    scale: [3.0,3.0,3.0]
-    rotation: [0.0,1.57,1.57]
+    scale: [4.0,4.0,4.0]
+    rotation: [1.57,0.0,-1.57]
     translation: [0.8,-0.1,0.05]
-    file: bunny.pcd
+    file: bunnyData.pts

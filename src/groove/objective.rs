@@ -145,24 +145,21 @@ impl ObjectiveTrait for EnvCollision {
         // let start = PreciseTime::now();\
         let mut sum: f64 = 0.0;
         for option in &v.env_collision.nearest_obstacles[self.arm_idx] {
-            match option {
-                Some(handle) => {
-                    let obstacle = v.env_collision.world.objects.get(*handle).unwrap();
-                    let link_radius = v.env_collision.link_radius;
-                    let penalty_cutoff: f64 = link_radius / 2.0;
-                    let a = 0.005 * (penalty_cutoff.powi(10));
-                    let last_elem = frames[self.arm_idx].0.len() - 1;
-                    for i in 0..last_elem {
-                        let start_pt = Point3::from(frames[self.arm_idx].0[i]);
-                        let end_pt = Point3::from(frames[self.arm_idx].0[i + 1]);
-                        let segment = shape::Segment::new(start_pt, end_pt);
-                        let segment_pos = nalgebra::one();
-                        let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
-                        // println!("Link: {}, Distance: {:?}", j, dis);
-                        sum += a / dis.powi(10); 
-                    }
-                },
-                None => {},
+            if let Some(handle) = option {
+                let obstacle = v.env_collision.world.objects.get(*handle).unwrap();
+                let link_radius = v.env_collision.link_radius;
+                let penalty_cutoff: f64 = link_radius / 2.0;
+                let a = 0.005 * (penalty_cutoff.powi(10));
+                let last_elem = frames[self.arm_idx].0.len() - 1;
+                for i in 0..last_elem {
+                    let start_pt = Point3::from(frames[self.arm_idx].0[i]);
+                    let end_pt = Point3::from(frames[self.arm_idx].0[i + 1]);
+                    let segment = shape::Segment::new(start_pt, end_pt);
+                    let segment_pos = nalgebra::one();
+                    let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
+                    // println!("Link: {}, Distance: {:?}", j, dis);
+                    sum += a / dis.powi(10); 
+                }
             }
         }
         

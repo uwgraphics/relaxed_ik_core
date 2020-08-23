@@ -4,6 +4,8 @@ use yaml_rust::{YamlLoader, Yaml};
 use nalgebra;
 use nalgebra::{DMatrix, DVector};
 use crate::utils_rust::shape_parser_utils::{Cuboid, Sphere};
+use std::path::Path;
+use std::io;
 
 pub fn get_yaml_obj(fp: String) -> Vec<Yaml> {
     let mut file = File::open(fp.as_str()).unwrap();
@@ -245,11 +247,12 @@ pub struct RobotCollisionSpecFileParser {
 }
 impl RobotCollisionSpecFileParser {
     pub fn from_yaml_path(fp: String) -> Self {
+        let fp2 = fp.clone();
         let docs = get_yaml_obj(fp);
         let doc = &docs[0];
         let mut cuboids_option = doc["boxes"].as_vec();
         let mut spheres_option = doc["spheres"].as_vec();
-        let mut sphere_lists_option = doc["sphere_lists"].as_vec();
+        let mut point_cloud_option = doc["point_cloud"].as_vec();
 
         let robot_link_radius = doc["robot_link_radius"].as_f64().unwrap();
 
@@ -301,28 +304,50 @@ impl RobotCollisionSpecFileParser {
             }
         }
 
-        if sphere_lists_option.is_some() {
-            let sphere_lists_list = sphere_lists_option.unwrap();
-            let l = sphere_lists_list.len();
+        if point_cloud_option.is_some() {
+            let point_cloud_list = point_cloud_option.unwrap();
+            let l = point_cloud_list.len();
 
             for i in 0..l {
-                let name = sphere_lists_list[i]["name"].as_str().unwrap().to_string();
-                let radius = sphere_lists_list[i]["parameters"].as_f64().unwrap();
+                let name = point_cloud_list[i]["name"].as_str().unwrap().to_string();
+                let radius = point_cloud_list[i]["parameters"].as_f64().unwrap();
 
-                let coordinate_frame = sphere_lists_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
+                let coordinate_frame = point_cloud_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
 
-                let ts = sphere_lists_list[i]["translation"].as_vec().unwrap();
+                let scale = point_cloud_list[i]["scale"].as_vec().unwrap();
+                let sx = scale[0].as_f64().unwrap();
+                let sy = scale[1].as_f64().unwrap();
+                let sz = scale[2].as_f64().unwrap();
+
+                let ts = point_cloud_list[i]["translation"].as_vec().unwrap();
                 let tx = ts[0].as_f64().unwrap();
                 let ty = ts[1].as_f64().unwrap();
                 let tz = ts[2].as_f64().unwrap();
 
-                let positions = sphere_lists_list[i]["points"].as_vec().unwrap();
-                for p in positions {
-                    let pos = p.as_vec().unwrap();
-                    let x = pos[0].as_f64().unwrap();
-                    let y = pos[1].as_f64().unwrap();
-                    let z = pos[2].as_f64().unwrap();
-                    spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + x, ty + y, tz + z));
+                let rots = point_cloud_list[i]["rotation"].as_vec().unwrap();
+                let rx = rots[0].as_f64().unwrap();
+                let ry = rots[1].as_f64().unwrap();
+                let rz = rots[2].as_f64().unwrap();
+                let t = nalgebra::Rotation3::from_euler_angles(rx, ry, rz);
+                // println!("Rotation matrix: {:?}", t);
+
+                let parent_path = Path::new(fp2.as_str()).parent().unwrap().to_str().unwrap();
+                let point_cloud_path = format!("{}/{}", parent_path, point_cloud_list[i]["file"].as_str().unwrap());
+                let point_cloud_file = File::open(point_cloud_path).unwrap();
+                let lines: Vec<Result<String, io::Error>> = io::BufReader::new(point_cloud_file).lines().collect();
+                for line in lines {
+                    if let Ok(l) = line {
+                        let data: Vec<&str> = l.split(" ").collect();
+                        if data.len() >= 3 && data[0].parse::<f64>().is_ok() && data[1].parse::<f64>().is_ok() && data[2].parse::<f64>().is_ok() {
+                            let x = data[0].parse::<f64>().unwrap();
+                            let y = data[1].parse::<f64>().unwrap();
+                            let z = data[2].parse::<f64>().unwrap();
+                            // println!("Point: ({}, {}, {})", x, y, z);
+                            let pt_rot = t * nalgebra::Vector3::new(x, y, z);
+                            spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + sx * pt_rot[0], 
+                                ty + sy * pt_rot[1], tz + sz * pt_rot[2]));
+                        }
+                    }
                 }
             }
         }
