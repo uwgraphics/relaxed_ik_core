@@ -212,7 +212,7 @@ impl RelaxedIKVars {
                 }
             }
             println!("Number of active obstacles: {}", active_obstacles.len());
-            self.env_collision.nearest_obstacles[arm_idx] = active_obstacles;
+            self.env_collision.active_obstacles[arm_idx] = active_obstacles;
         }
         
         self.env_collision.world.update();

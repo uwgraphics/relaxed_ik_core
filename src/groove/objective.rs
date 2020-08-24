@@ -144,7 +144,7 @@ impl ObjectiveTrait for EnvCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
         // let start = PreciseTime::now();\
         let mut sum: f64 = 0.0;
-        for option in &v.env_collision.nearest_obstacles[self.arm_idx] {
+        for option in &v.env_collision.active_obstacles[self.arm_idx] {
             if let Some(handle) = option {
                 let obstacle = v.env_collision.world.objects.get(*handle).unwrap();
                 let link_radius = v.env_collision.link_radius;

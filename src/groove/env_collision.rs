@@ -28,7 +28,7 @@ pub struct RelaxedIKEnvCollision {
     pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub link_radius: f64,
     pub active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>>,
-    pub nearest_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>>,
+    pub active_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>>,
 }
 
 impl RelaxedIKEnvCollision {
@@ -61,7 +61,7 @@ impl RelaxedIKEnvCollision {
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
         let mut active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>> = Vec::new();
-        let mut nearest_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>> = Vec::new();
+        let mut active_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>> = Vec::new();
         for arm_idx in 0..frames.len() {
             let mut handles: Vec<CollisionObjectSlabHandle> = Vec::new();
             let mut obstacles: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
@@ -79,7 +79,7 @@ impl RelaxedIKEnvCollision {
             }
             link_handles.push(handles);
             active_pairs.push(pair);
-            nearest_obstacles.push(obstacles);
+            active_obstacles.push(obstacles);
         }
 
         // let mut planes = Vec::new();
@@ -114,7 +114,7 @@ impl RelaxedIKEnvCollision {
         // Register our handlers.
         // world.register_proximity_handler("ProximityMessage", ProximityMessage);
         
-        return Self{world, link_handles, link_radius, active_pairs, nearest_obstacles};
+        return Self{world, link_handles, link_radius, active_pairs, active_obstacles};
     }
 
     pub fn update_collision_world(

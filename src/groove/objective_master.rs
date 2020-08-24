@@ -22,6 +22,16 @@ impl ObjectiveMaster {
         Self{objectives, num_chains, weight_priors, lite: true, finite_diff_grad: true}
     }
 
+    pub fn tune_weight_priors(&mut self, vars: &RelaxedIKVars) {
+        // for i in 0..self.num_chains {
+        //     let num_active_obstacles = vars.env_collision.active_obstacles[i].len() as f64;
+        //     let a = 1.0;
+        //     self.weight_priors[3*i] = 10.0 * (-a * num_active_obstacles).exp();
+        //     self.weight_priors[3*i+1] = 9.0 * (-a * num_active_obstacles).exp();
+        // }
+        // println!("Weights: {:?}", self.weight_priors);
+    }
+
     pub fn relaxed_ik(num_chains: usize) -> Self {
         let mut objectives: Vec<Box<dyn ObjectiveTrait>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
