@@ -6,11 +6,11 @@ author = ""
 sec = 3
 +++
 
-Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect it to different interfaces. Here are three wrappers that we implemented for ROS, ROS2, and Unity respectively. If you are interested, it is possible to wrap up the core to other interfaces as well. Each of them have detailed instructions on how to work with them in their README.
+Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 5 wrappers that we implemented for ROS, ROS2, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the README in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well. 
 
 ### Relaxed IK ROS
 + Available at [relaxed_ik_ros1](https://github.com/uwgraphics/relaxed_ik_ros1).
-+ This is a lighter-weight version of RelaxedIK wrapped up in ROS1 with pre-generated config files of some mostly used robot arms. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. However, you will not be able to customize your own config files in this wrapper. You can go to this link instead [relaxed_ik](https://github.com/uwgraphics/relaxed_ik) for the complete version. In the complete version, you will have the opportunity to (and have to) set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc. The complete version is recommended if you would like to work on the configuration process yourself or a robot that we didn't include in the available options; otherwise, this wrapper is likely to make your life much easier since everything you need to do will be setting the name of the robot you would like to work with.
++ This is a lighter-weight version of RelaxedIK wrapped up in ROS1. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. You can treat this wrapper as a new iteration over [relaxed_ik](https://github.com/uwgraphics/relaxed_ik/tree/dev).
 + Please refer to the README in the repo for more infomation.
 
 ### Relaxed IK ROS2 (Under developed)

@@ -4,9 +4,11 @@ This is the core part of relaxed IK solver. Here is the project page that has mo
 
 RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as "move the robot's right arm end-effector to position X, while maintaining an end-effector orientation Y") to Joint-Space (i.e., the robot's rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.
 
-Usually you don't want to run this repo (although it is runnable, please refer to the run section), instead, you may want to work with one of the wrappers of RelaxedIK:
+Usually you don't want to run this repo (although it is runnable, please refer to the run section below), instead, you may want to work with one of the wrappers of RelaxedIK:
 + Wrapper in ROS: [relaxed_ik_ros1](https://github.com/uwgraphics/relaxed_ik_ros1)
 + Wrapper in ROS2 (Under developed): [relaxed_ik_ros2](https://github.com/uwgraphics/relaxed_ik_ros2)
++ Wrapper in CoppeliaSim: [relaxed_ik_coppeliasim](https://github.com/uwgraphics/relaxed_ik_coppeliasim)
++ Wrapper in Mujoco: [relaxed_ik_mujoco](https://github.com/uwgraphics/relaxed_ik_mujoco)
 + Wrapper in Unity, Windows: [relaxed_ik_unity](https://github.com/uwgraphics/relaxed_ik_unity)
 
 ## Dependencies
