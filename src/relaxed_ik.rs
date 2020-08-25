@@ -45,7 +45,7 @@ impl RelaxedIK {
     pub fn from_loaded(mode: usize) -> Self {
         let path_to_src = get_path_to_src();
         let fp1 = path_to_src +  "relaxed_ik_core/config/loaded_robot";
-        let info_file_name = get_file_contents(fp1);
+        let info_file_name = get_file_contents(fp1).trim().to_string();
         RelaxedIK::from_info_file_name(info_file_name.clone(), mode.clone())
     }
 
