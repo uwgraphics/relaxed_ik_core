@@ -15,4 +15,3 @@ disp_offsets: [ [0.0,0.0,0.333] ]
 rot_offsets: [ [ [0.0,0.0,0.0], [-1.57079632679,0.0,0.0], [1.57079632679,0.0,0.0], [1.57079632679,0.0,0.0], [-1.57079632679,0.0,0.0], [1.57079632679,0.0,0.0], [1.57079632679,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,-0.785398163397] ] ]
 joint_types: [ [ "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "fixed" ] ]
 joint_state_define_func_file: "panda_arm_hand_joint_state_define"
-env_collision_file_name: "env_collision_panda.yaml"

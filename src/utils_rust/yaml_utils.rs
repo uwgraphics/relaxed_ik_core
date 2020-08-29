@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use yaml_rust::{YamlLoader, Yaml};
 use nalgebra;
 use nalgebra::{DMatrix, DVector};
-use crate::utils_rust::shape_parser_utils::{Cuboid, Sphere};
+use crate::utils_rust::shape_parser_utils::{*};
 use std::path::Path;
 use std::io;
 
@@ -34,8 +34,7 @@ pub struct InfoFileParser {
     pub disp_offsets: Vec<nalgebra::Vector3<f64>>,
     pub rot_offsets: Vec<Vec<Vec<f64>>>,
     pub joint_types: Vec<Vec<String>>,
-    pub joint_state_define_func_file: String,
-    pub env_collision_file_name: String,
+    pub joint_state_define_func_file: String
 }
 impl InfoFileParser {
     pub fn from_yaml_path(fp: String) -> InfoFileParser {
@@ -140,10 +139,8 @@ impl InfoFileParser {
             }
         }
 
-        let env_collision_file_name = String::from(doc["env_collision_file_name"].as_str().unwrap());
-
         InfoFileParser{urdf_file_name, fixed_frame, joint_names, joint_ordering, ee_fixed_joints, starting_config, collision_file_name, collision_nn_file, path_to_src, axis_types, velocity_limits,
-            joint_limits, displacements, disp_offsets, rot_offsets, joint_types, joint_state_define_func_file, env_collision_file_name}
+            joint_limits, displacements, disp_offsets, rot_offsets, joint_types, joint_state_define_func_file}
     }
 }
 
@@ -247,12 +244,10 @@ pub struct RobotCollisionSpecFileParser {
 }
 impl RobotCollisionSpecFileParser {
     pub fn from_yaml_path(fp: String) -> Self {
-        let fp2 = fp.clone();
         let docs = get_yaml_obj(fp);
         let doc = &docs[0];
         let mut cuboids_option = doc["boxes"].as_vec();
         let mut spheres_option = doc["spheres"].as_vec();
-        let mut point_cloud_option = doc["point_cloud"].as_vec();
 
         let robot_link_radius = doc["robot_link_radius"].as_f64().unwrap();
 
@@ -269,7 +264,7 @@ impl RobotCollisionSpecFileParser {
                 let y_halflength = params[1].as_f64().unwrap();
                 let z_halflength = params[2].as_f64().unwrap();
 
-                let coordinate_frame = cuboids_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
+                let coordinate_frame = cuboids_list[i]["coordinate_frame"].as_str().unwrap().to_string();
 
                 let rots = cuboids_list[i]["rotation"].as_vec().unwrap();
                 let rx = rots[0].as_f64().unwrap();
@@ -293,7 +288,7 @@ impl RobotCollisionSpecFileParser {
                 let name = spheres_list[i]["name"].as_str().unwrap().to_string();
                 let radius = spheres_list[i]["parameters"].as_f64().unwrap();
 
-                let coordinate_frame = spheres_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
+                let coordinate_frame = spheres_list[i]["coordinate_frame"].as_str().unwrap().to_string();
 
                 let ts = spheres_list[i]["translation"].as_vec().unwrap();
                 let tx = ts[0].as_f64().unwrap();
@@ -301,6 +296,85 @@ impl RobotCollisionSpecFileParser {
                 let tz = ts[2].as_f64().unwrap();
 
                 spheres.push(Sphere::new(name, radius, coordinate_frame, tx, ty, tz));
+            }
+        }
+
+        Self{robot_link_radius, cuboids, spheres}
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct EnvCollisionFileParser {
+    pub robot_link_radius: f64,
+    pub cuboids: Vec<CuboidEnv>,
+    pub spheres: Vec<SphereEnv>
+}
+impl EnvCollisionFileParser {
+    pub fn from_yaml_path(fp: String) -> Self {
+        let fp2 = fp.clone();
+        let docs = get_yaml_obj(fp);
+        let doc = &docs[0];
+        let mut cuboids_option = doc["boxes"].as_vec();
+        let mut spheres_option = doc["spheres"].as_vec();
+        let mut point_cloud_option = doc["point_cloud"].as_vec();
+
+        let robot_link_radius = doc["robot_link_radius"].as_f64().unwrap();
+
+        let mut cuboids: Vec<CuboidEnv> = Vec::new();
+        let mut spheres: Vec<SphereEnv> = Vec::new();
+
+        if cuboids_option.is_some() {
+            let cuboids_list = cuboids_option.unwrap();
+            let l = cuboids_list.len();
+            for i in 0..l {
+                let name = cuboids_list[i]["name"].as_str().unwrap().to_string();
+                let params = cuboids_list[i]["parameters"].as_vec().unwrap();
+                let x_halflength = params[0].as_f64().unwrap();
+                let y_halflength = params[1].as_f64().unwrap();
+                let z_halflength = params[2].as_f64().unwrap();
+
+                let rots = cuboids_list[i]["rotation"].as_vec().unwrap();
+                let rx = rots[0].as_f64().unwrap();
+                let ry = rots[1].as_f64().unwrap();
+                let rz = rots[2].as_f64().unwrap();
+
+                let ts = cuboids_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let dynamic_val = cuboids_list[i]["is_dynamic"].as_i64().unwrap();
+
+                let mut is_dynamic = false;
+                if dynamic_val > 0 {
+                    is_dynamic = true;
+                }
+
+                cuboids.push(CuboidEnv::new(name, x_halflength, y_halflength, z_halflength, rx, ry, rz, tx, ty, tz, is_dynamic));
+            }
+        }
+
+        if spheres_option.is_some() {
+            let spheres_list = spheres_option.unwrap();
+            let l = spheres_list.len();
+
+            for i in 0..l {
+                let name = spheres_list[i]["name"].as_str().unwrap().to_string();
+                let radius = spheres_list[i]["parameters"].as_f64().unwrap();
+
+                let ts = spheres_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let dynamic_val = spheres_list[i]["is_dynamic"].as_i64().unwrap();
+
+                let mut is_dynamic = false;
+                if dynamic_val > 0 {
+                    is_dynamic = true;
+                }
+
+                spheres.push(SphereEnv::new(name, radius, tx, ty, tz, is_dynamic));
             }
         }
 
@@ -344,8 +418,8 @@ impl RobotCollisionSpecFileParser {
                             let z = data[2].parse::<f64>().unwrap();
                             // println!("Point: ({}, {}, {})", x, y, z);
                             let pt_rot = t * nalgebra::Vector3::new(x, y, z);
-                            spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + sx * pt_rot[0], 
-                                ty + sy * pt_rot[1], tz + sz * pt_rot[2]));
+                            // spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + sx * pt_rot[0], 
+                            //     ty + sy * pt_rot[1], tz + sz * pt_rot[2]));
                         }
                     }
                 }

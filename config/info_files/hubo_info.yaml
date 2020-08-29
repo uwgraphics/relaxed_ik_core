@@ -15,4 +15,3 @@ disp_offsets: [ [0.0,0.0,0.0], [0.0,0.0,0.0] ]
 rot_offsets: [ [ [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0] ], [ [0.0,0.0,0.0], [0.0,-0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0] ] ]
 joint_types: [ [ "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute" ], [ "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute", "revolute" ] ]
 joint_state_define_func_file: "hubo_description_joint_state_define"
-env_collision_file_name: "env_collision_hubo.yaml"

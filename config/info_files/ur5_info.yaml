@@ -15,4 +15,3 @@ disp_offsets: [ [0.0,0.0,0.089159] ]
 rot_offsets: [ [ [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,0.0], [0.0,0.0,1.570796325] ] ]
 joint_types: [ [ "revolute", "revolute", "revolute", "revolute", "revolute", "revolute" ] ]
 joint_state_define_func_file: "ur5_joint_state_define"
-env_collision_file_name: "env_collision_ur5.yaml"

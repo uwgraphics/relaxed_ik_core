@@ -1,5 +1,5 @@
 use nalgebra::{UnitQuaternion, Vector3, Quaternion, Point3};
-use crate::utils_rust::yaml_utils::{get_yaml_obj, InfoFileParser, RobotCollisionSpecFileParser};
+use crate::utils_rust::yaml_utils::{*};
 use crate::spacetime::robot::Robot;
 use crate::groove::collision_nn::CollisionNN;
 use crate::utils_rust::sampler::ThreadRobotSampler;
@@ -72,8 +72,8 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "relaxed_ik_core/config/env_collision_files/" + ifp.env_collision_file_name.as_str();
-        let env_collision_file = RobotCollisionSpecFileParser::from_yaml_path(env_collision_path);
+        let env_collision_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
+        let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_path);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
 
@@ -113,8 +113,8 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "relaxed_ik_core/config/env_collision_files/" + ifp.env_collision_file_name.as_str();
-        let env_collision_file = RobotCollisionSpecFileParser::from_yaml_path(env_collision_path);
+        let env_collision_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
+        let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_path);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
 
@@ -134,14 +134,14 @@ impl RelaxedIKVars {
     pub fn update_collision_world(&mut self) {
         // let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
-        self.env_collision.update_collision_world(&frames);
+        self.env_collision.update_links(&frames);
         for event in self.env_collision.world.proximity_events() {
             let c1 = self.env_collision.world.objects.get(event.collider1).unwrap();
             let c2 = self.env_collision.world.objects.get(event.collider2).unwrap();
             if event.new_status == Proximity::Intersecting {
-                println!("===== {:?} Intersecting of {:?} =====", c1.data().name, c2.data().name);
+                // println!("===== {:?} Intersecting of {:?} =====", c1.data().name, c2.data().name);
             } else if event.new_status == Proximity::WithinMargin {
-                println!("===== {:?} WithinMargin of {:?} =====", c1.data().name, c2.data().name);
+                // println!("===== {:?} WithinMargin of {:?} =====", c1.data().name, c2.data().name);
                 if c1.data().is_link {
                     let arm_idx = c1.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
@@ -160,7 +160,7 @@ impl RelaxedIKVars {
                     }
                 }
             } else {
-                println!("===== {:?} Disjoint of {:?} =====", c1.data().name, c2.data().name);
+                // println!("===== {:?} Disjoint of {:?} =====", c1.data().name, c2.data().name);
                 if c1.data().is_link {
                     let arm_idx = c1.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
@@ -211,7 +211,7 @@ impl RelaxedIKVars {
                     active_obstacles.push(Some(*key));
                 }
             }
-            println!("Number of active obstacles: {}", active_obstacles.len());
+            // println!("Number of active obstacles: {}", active_obstacles.len());
             self.env_collision.active_obstacles[arm_idx] = active_obstacles;
         }
         

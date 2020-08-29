@@ -1,4 +1,4 @@
-use crate::utils_rust::yaml_utils::{RobotCollisionSpecFileParser};
+use crate::utils_rust::yaml_utils::EnvCollisionFileParser;
 use nalgebra::{Vector3, Isometry3, Point3};
 use nalgebra::geometry::{Translation3, UnitQuaternion, Quaternion};
 use ncollide3d::pipeline::{*};
@@ -25,24 +25,21 @@ impl CollisionObjectData {
 
 pub struct RelaxedIKEnvCollision {
     pub world: CollisionWorld<f64, CollisionObjectData>,
-    pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub link_radius: f64,
+    pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
+    pub dyn_obstacle_handles: Vec<CollisionObjectSlabHandle>,
     pub active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>>,
     pub active_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>>,
 }
 
 impl RelaxedIKEnvCollision {
     pub fn init_collision_world (
-        env_collision_file: RobotCollisionSpecFileParser,
+        env_collision_file: EnvCollisionFileParser,
         frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>,
     ) -> Self {
         let link_radius = env_collision_file.robot_link_radius;
         let plane_obstacles = env_collision_file.cuboids;
         let sphere_obstacles = env_collision_file.spheres;
-
-        // let mut robot_groups = CollisionGroups::new();
-        // robot_groups.set_membership(&[1]);
-        // robot_groups.set_whitelist(&[2]);
 
         // The links are part of group 1 and can only interact with obstacles
         let mut link_groups = CollisionGroups::new();
@@ -56,7 +53,7 @@ impl RelaxedIKEnvCollision {
         others_groups.set_blacklist(&[2]);
         others_groups.set_whitelist(&[1]);
 
-        let proximity_query = GeometricQueryType::Proximity(1.0 * link_radius);
+        let proximity_query = GeometricQueryType::Proximity(link_radius);
 
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
@@ -82,8 +79,7 @@ impl RelaxedIKEnvCollision {
             active_obstacles.push(obstacles);
         }
 
-        // let mut planes = Vec::new();
-        // let mut planes_pos = Vec::new();
+        let mut dyn_obstacle_handles: Vec<CollisionObjectSlabHandle> = Vec::new();
         for i in 0..plane_obstacles.len() {
             let plane_obs = &plane_obstacles[i];
             let half_extents = Vector3::new(plane_obs.x_halflength, plane_obs.y_halflength, plane_obs.z_halflength);
@@ -91,33 +87,33 @@ impl RelaxedIKEnvCollision {
             let plane_ts = Translation3::new(plane_obs.tx, plane_obs.ty, plane_obs.tz);
             let plane_rot = UnitQuaternion::from_euler_angles(plane_obs.rx, plane_obs.ry, plane_obs.rz);
             let plane_pos = Isometry3::from_parts(plane_ts, plane_rot);
-            // planes.push(plane);
-            // planes_pos.push(plane_pos);
             let plane_data = CollisionObjectData::new(format!("Plane {}", i + 1), false, -1);
-            world.add(plane_pos, plane, others_groups, proximity_query, plane_data);
+            let plane_handle = world.add(plane_pos, plane, others_groups, proximity_query, plane_data);
+            if plane_obs.is_dynamic {
+                dyn_obstacle_handles.push(plane_handle.0);
+            }
         }
 
-        // let mut spheres = Vec::new();
-        // let mut spheres_pos = Vec::new();
         for i in 0..sphere_obstacles.len() {
             let sphere_obs = &sphere_obstacles[i];
             let sphere = ShapeHandle::new(Ball::new(sphere_obs.radius));
             let sphere_ts = Translation3::new(sphere_obs.tx, sphere_obs.ty, sphere_obs.tz);
             let sphere_rot = UnitQuaternion::identity();
             let sphere_pos = Isometry3::from_parts(sphere_ts, sphere_rot);
-            // spheres.push(sphere);
-            // spheres_pos.push(sphere_pos);
             let sphere_data = CollisionObjectData::new(format!("Sphere {}", i + 1), false, -1);
-            world.add(sphere_pos, sphere, others_groups, proximity_query, sphere_data);
+            let sphere_handle = world.add(sphere_pos, sphere, others_groups, proximity_query, sphere_data);
+            if sphere_obs.is_dynamic {
+                dyn_obstacle_handles.push(sphere_handle.0);
+            }
         }
 
         // Register our handlers.
         // world.register_proximity_handler("ProximityMessage", ProximityMessage);
         
-        return Self{world, link_handles, link_radius, active_pairs, active_obstacles};
+        return Self{world, link_radius, link_handles, dyn_obstacle_handles, active_pairs, active_obstacles};
     }
 
-    pub fn update_collision_world(
+    pub fn update_links(
         &mut self,
         frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>,
     ) {
@@ -127,9 +123,21 @@ impl RelaxedIKEnvCollision {
                 let start_pt = Point3::from(frames[arm_idx].0[i]);
                 let end_pt = Point3::from(frames[arm_idx].0[i + 1]);
                 let segment = ShapeHandle::new(Segment::new(start_pt, end_pt));
-                let co = self.world.objects.get_mut(self.link_handles[arm_idx][i]).unwrap();
-                co.set_shape(segment);
+                let link = self.world.objects.get_mut(self.link_handles[arm_idx][i]).unwrap();
+                link.set_shape(segment);
             }
         }
+    }
+
+    pub fn update_dynamic_obstacle(
+        &mut self,
+        idx: usize,
+        position: Isometry3<f64>,
+    ) {
+        let co = self.world.objects.get_mut(self.dyn_obstacle_handles[idx]).unwrap();
+        // println!("Object: {:?}", co.data());
+        co.set_position(position);
+        // println!("Pos: {:?}", co.position());
+        // self.world.update();
     }
 }

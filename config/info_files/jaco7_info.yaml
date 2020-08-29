@@ -15,4 +15,3 @@ disp_offsets: [ [0.0,0.0,0.15675] ]
 rot_offsets: [ [ [0.0,3.14159265359,0.0], [-1.57079632679,0.0,3.14159265359], [-1.57079632679,0.0,0.0], [1.57079632679,0.0,3.14159265359], [-1.57079632679,0.0,3.14159265359], [1.57079632679,0.0,3.14159265359], [-1.57079632679,0.0,3.14159265359], [3.14159265359,0.0,0.0] ] ]
 joint_types: [ [ "continuous", "revolute", "continuous", "revolute", "continuous", "revolute", "continuous" ] ]
 joint_state_define_func_file: "jaco7_joint_state_define"
-env_collision_file_name: "env_collision_jaco7.yaml"

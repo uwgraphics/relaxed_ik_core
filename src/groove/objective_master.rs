@@ -2,7 +2,7 @@ use crate::groove::objective::*;
 use crate::groove::vars::RelaxedIKVars;
 
 pub struct ObjectiveMaster {
-    pub objectives: Vec<Box<dyn ObjectiveTrait>>,
+    pub objectives: Vec<Box<dyn ObjectiveTrait + Send>>,
     pub num_chains: usize,
     pub weight_priors: Vec<f64>,
     pub lite: bool,
@@ -11,7 +11,7 @@ pub struct ObjectiveMaster {
 
 impl ObjectiveMaster {
     pub fn standard_ik(num_chains: usize) -> Self {
-        let mut objectives: Vec<Box<dyn ObjectiveTrait>> = Vec::new();
+        let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
@@ -33,7 +33,7 @@ impl ObjectiveMaster {
     }
 
     pub fn relaxed_ik(num_chains: usize) -> Self {
-        let mut objectives: Vec<Box<dyn ObjectiveTrait>> = Vec::new();
+        let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
