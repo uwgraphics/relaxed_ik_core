@@ -385,8 +385,11 @@ impl EnvCollisionFileParser {
             for i in 0..l {
                 let name = point_cloud_list[i]["name"].as_str().unwrap().to_string();
                 let radius = point_cloud_list[i]["parameters"].as_f64().unwrap();
-
-                let coordinate_frame = point_cloud_list[i]["coordinate_frame"].as_i64().unwrap().to_string();
+                let dynamic_val = point_cloud_list[i]["is_dynamic"].as_i64().unwrap();
+                let mut is_dynamic = false;
+                if dynamic_val > 0 {
+                    is_dynamic = true;
+                }
 
                 let scale = point_cloud_list[i]["scale"].as_vec().unwrap();
                 let sx = scale[0].as_f64().unwrap();
@@ -418,8 +421,8 @@ impl EnvCollisionFileParser {
                             let z = data[2].parse::<f64>().unwrap();
                             // println!("Point: ({}, {}, {})", x, y, z);
                             let pt_rot = t * nalgebra::Vector3::new(x, y, z);
-                            // spheres.push(Sphere::new(name.clone(), radius, coordinate_frame.clone(), tx + sx * pt_rot[0], 
-                            //     ty + sy * pt_rot[1], tz + sz * pt_rot[2]));
+                            spheres.push(SphereEnv::new(name.clone(), radius, tx + sx * pt_rot[0], 
+                                ty + sy * pt_rot[1], tz + sz * pt_rot[2], is_dynamic));
                         }
                     }
                 }

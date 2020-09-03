@@ -9,9 +9,13 @@ lazy_static! {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn dynamic_obstacle_cb(idx: c_int, pos_arr: *const c_double, quat_arr: *const c_double) {
+pub unsafe extern "C" fn dynamic_obstacle_cb(name: *const c_char, pos_arr: *const c_double, quat_arr: *const c_double) {
+    assert!(!name.is_null(), "Empty name!");
     assert!(!pos_arr.is_null(), "Null pointer for pos!");
     assert!(!quat_arr.is_null(), "Null pointer for quat!");
+
+    let c_str = std::ffi::CStr::from_ptr(name);
+    let name_str = c_str.to_str().expect("Not a valid UTF-8 string");
 
     let pos_slice: &[c_double] = std::slice::from_raw_parts(pos_arr, 3);
     let quat_slice: &[c_double] = std::slice::from_raw_parts(quat_arr, 4);
@@ -26,7 +30,7 @@ pub unsafe extern "C" fn dynamic_obstacle_cb(idx: c_int, pos_arr: *const c_doubl
 
     // println!("{:?}", pos);
 
-    R.lock().unwrap().vars.env_collision.update_dynamic_obstacle(idx as usize, pos);
+    R.lock().unwrap().vars.env_collision.update_dynamic_obstacle(name_str, pos);
 
     // println!("O Thread ID: {:?}", std::thread::current().id());
 }

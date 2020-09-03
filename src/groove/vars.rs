@@ -131,7 +131,7 @@ impl RelaxedIKVars {
         self.xopt = xopt.clone();
     }
 
-    pub fn update_collision_world(&mut self) {
+    pub fn update_collision_world(&mut self) -> bool {
         // let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
         self.env_collision.update_links(&frames);
@@ -145,7 +145,10 @@ impl RelaxedIKVars {
                 if c1.data().is_link {
                     let arm_idx = c1.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
-                        self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap().push(event.collider1);
+                        let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap();
+                        if !links.contains(&event.collider1) {
+                            links.push(event.collider1);
+                        }
                     } else {
                         let links: Vec<CollisionObjectSlabHandle> = vec![event.collider1];
                         self.env_collision.active_pairs[arm_idx].insert(event.collider2, links);
@@ -153,7 +156,10 @@ impl RelaxedIKVars {
                 } else if c2.data().is_link {
                     let arm_idx = c2.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
-                        self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap().push(event.collider2);
+                        let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap();
+                        if !links.contains(&event.collider2) {
+                            links.push(event.collider2);
+                        }
                     } else {
                         let links: Vec<CollisionObjectSlabHandle> = vec![event.collider2];
                         self.env_collision.active_pairs[arm_idx].insert(event.collider1, links);
@@ -165,8 +171,10 @@ impl RelaxedIKVars {
                     let arm_idx = c1.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap();
-                        let index = links.iter().position(|x| *x == event.collider1).unwrap();
-                        links.remove(index);
+                        if links.contains(&event.collider1) {
+                            let index = links.iter().position(|x| *x == event.collider1).unwrap();
+                            links.remove(index);
+                        }
                         if links.len() == 0 {
                             self.env_collision.active_pairs[arm_idx].remove(&event.collider2);
                         }
@@ -175,8 +183,10 @@ impl RelaxedIKVars {
                     let arm_idx = c2.data().arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap();
-                        let index = links.iter().position(|x| *x == event.collider2).unwrap();
-                        links.remove(index);
+                        if links.contains(&event.collider2) {
+                            let index = links.iter().position(|x| *x == event.collider2).unwrap();
+                            links.remove(index);
+                        }
                         if links.len() == 0 {
                             self.env_collision.active_pairs[arm_idx].remove(&event.collider1);
                         }
@@ -186,10 +196,12 @@ impl RelaxedIKVars {
             // self.print_active_pairs();
         }
 
+        self.env_collision.world.update();
+
         for arm_idx in 0..frames.len() {
             let link_radius = self.env_collision.link_radius;
-            let penalty_cutoff: f64 = link_radius / 2.0;
-            let a = 0.005 * (penalty_cutoff.powi(10));
+            let penalty_cutoff: f64 = link_radius * 1.5;
+            let a = 0.01 * (penalty_cutoff.powi(20));
             // let mut sum_max: f64 = 0.0;
             let mut active_obstacles: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
             for key in self.env_collision.active_pairs[arm_idx].keys() {
@@ -203,10 +215,14 @@ impl RelaxedIKVars {
                     let segment = Segment::new(start_pt, end_pt);
                     let segment_pos = nalgebra::one();
                     let dis = distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
-                    // println!("Link: {}, Distance: {:?}", j, dis);
-                    sum += a / dis.powi(10); 
+                    // println!("VARS -> {:?}, Link{}, Distance: {:?}", obstacle.data(), j, dis);
+                    if dis > 0.0 {
+                        sum += a / (dis + link_radius).powi(20);
+                    } else {
+                        return true;
+                    }
                 }
-                // println!("Sum: {}", sum);
+                // println!("VARS -> {:?}, Sum: {:?}", obstacle.data().name, sum);
                 if sum > 0.02 {
                     active_obstacles.push(Some(*key));
                 }
@@ -215,9 +231,9 @@ impl RelaxedIKVars {
             self.env_collision.active_obstacles[arm_idx] = active_obstacles;
         }
         
-        self.env_collision.world.update();
         // let end = PreciseTime::now();
         // println!("Update collision world takes {}", start.to(end));
+        return false;
     }
 
     pub fn print_active_pairs(&self) {

@@ -143,13 +143,14 @@ impl EnvCollision {
 impl ObjectiveTrait for EnvCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
         // let start = PreciseTime::now();\
-        let mut sum: f64 = 0.0;
+        let mut x_val: f64 = 0.0;
+        let link_radius = v.env_collision.link_radius;
+        let penalty_cutoff: f64 = link_radius * 1.5;
+        let a = 0.01 * (penalty_cutoff.powi(20));
         for option in &v.env_collision.active_obstacles[self.arm_idx] {
             if let Some(handle) = option {
+                let mut sum: f64 = 0.0;
                 let obstacle = v.env_collision.world.objects.get(*handle).unwrap();
-                let link_radius = v.env_collision.link_radius;
-                let penalty_cutoff: f64 = link_radius / 2.0;
-                let a = 0.005 * (penalty_cutoff.powi(10));
                 let last_elem = frames[self.arm_idx].0.len() - 1;
                 for i in 0..last_elem {
                     let start_pt = Point3::from(frames[self.arm_idx].0[i]);
@@ -157,16 +158,18 @@ impl ObjectiveTrait for EnvCollision {
                     let segment = shape::Segment::new(start_pt, end_pt);
                     let segment_pos = nalgebra::one();
                     let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
-                    // println!("Link: {}, Distance: {:?}", j, dis);
-                    sum += a / dis.powi(10); 
+                    // println!("Obstacle: {}, Link: {}, Distance: {:?}", obstacle.data().name, i, dis);
+                    sum += a / (dis + link_radius).powi(20);
                 }
+                // println!("OBJECTIVE -> {:?}, Sum: {:?}", obstacle.data().name, sum);
+                x_val += sum;
             }
         }
         
         // let end = PreciseTime::now();
         // println!("Obstacles calculating takes {}", start.to(end));
 
-        groove_loss(sum, 0., 2, 2.1, 0.0002, 4)
+        groove_loss(x_val, 0., 2, 2.1, 0.0002, 4)
     }
 
     fn call_lite(&self, x: &[f64], v: &vars::RelaxedIKVars, ee_poses: &Vec<(nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>)>) -> f64 {
