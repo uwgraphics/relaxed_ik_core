@@ -70,3 +70,22 @@ impl SphereEnv {
         Self {name, radius, tx, ty, tz, is_dynamic}
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct PCDEnv {
+    pub name: String,
+    pub rx: f64,
+    pub ry: f64,
+    pub rz: f64,
+    pub tx: f64,
+    pub ty: f64,
+    pub tz: f64,
+    pub is_dynamic: bool,
+    pub points: Vec<SphereEnv>
+}
+
+impl PCDEnv {
+    pub fn new(name: String, rx: f64, ry: f64, rz: f64, tx: f64, ty: f64, tz: f64, is_dynamic: bool, points: Vec<SphereEnv>) -> Self {
+        Self {name, rx, ry, rz, tx, ty, tz, is_dynamic, points}
+    }
+}

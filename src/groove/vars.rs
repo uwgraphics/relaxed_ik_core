@@ -139,11 +139,11 @@ impl RelaxedIKVars {
             let c1 = self.env_collision.world.objects.get(event.collider1).unwrap();
             let c2 = self.env_collision.world.objects.get(event.collider2).unwrap();
             if event.new_status == Proximity::Intersecting {
-                // println!("===== {:?} Intersecting of {:?} =====", c1.data().name, c2.data().name);
+                println!("===== {:?} Intersecting of {:?} =====", c1.data().name, c2.data().name);
             } else if event.new_status == Proximity::WithinMargin {
-                // println!("===== {:?} WithinMargin of {:?} =====", c1.data().name, c2.data().name);
-                if c1.data().is_link {
-                    let arm_idx = c1.data().arm_idx as usize;
+                println!("===== {:?} WithinMargin of {:?} =====", c1.data().name, c2.data().name);
+                if c1.data().link_data.is_link {
+                    let arm_idx = c1.data().link_data.arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap();
                         if !links.contains(&event.collider1) {
@@ -153,8 +153,8 @@ impl RelaxedIKVars {
                         let links: Vec<CollisionObjectSlabHandle> = vec![event.collider1];
                         self.env_collision.active_pairs[arm_idx].insert(event.collider2, links);
                     }
-                } else if c2.data().is_link {
-                    let arm_idx = c2.data().arm_idx as usize;
+                } else if c2.data().link_data.is_link {
+                    let arm_idx = c2.data().link_data.arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap();
                         if !links.contains(&event.collider2) {
@@ -166,9 +166,9 @@ impl RelaxedIKVars {
                     }
                 }
             } else {
-                // println!("===== {:?} Disjoint of {:?} =====", c1.data().name, c2.data().name);
-                if c1.data().is_link {
-                    let arm_idx = c1.data().arm_idx as usize;
+                println!("===== {:?} Disjoint of {:?} =====", c1.data().name, c2.data().name);
+                if c1.data().link_data.is_link {
+                    let arm_idx = c1.data().link_data.arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider2) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider2).unwrap();
                         if links.contains(&event.collider1) {
@@ -179,8 +179,8 @@ impl RelaxedIKVars {
                             self.env_collision.active_pairs[arm_idx].remove(&event.collider2);
                         }
                     }
-                } else if c2.data().is_link {
-                    let arm_idx = c2.data().arm_idx as usize;
+                } else if c2.data().link_data.is_link {
+                    let arm_idx = c2.data().link_data.arm_idx as usize;
                     if self.env_collision.active_pairs[arm_idx].contains_key(&event.collider1) {
                         let links = self.env_collision.active_pairs[arm_idx].get_mut(&event.collider1).unwrap();
                         if links.contains(&event.collider2) {

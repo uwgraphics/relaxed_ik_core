@@ -307,21 +307,23 @@ impl RobotCollisionSpecFileParser {
 pub struct EnvCollisionFileParser {
     pub robot_link_radius: f64,
     pub cuboids: Vec<CuboidEnv>,
-    pub spheres: Vec<SphereEnv>
+    pub spheres: Vec<SphereEnv>,
+    pub pcds:Vec<PCDEnv>
 }
 impl EnvCollisionFileParser {
     pub fn from_yaml_path(fp: String) -> Self {
         let fp2 = fp.clone();
         let docs = get_yaml_obj(fp);
         let doc = &docs[0];
-        let mut cuboids_option = doc["boxes"].as_vec();
-        let mut spheres_option = doc["spheres"].as_vec();
-        let mut point_cloud_option = doc["point_cloud"].as_vec();
+        let cuboids_option = doc["boxes"].as_vec();
+        let spheres_option = doc["spheres"].as_vec();
+        let point_cloud_option = doc["point_cloud"].as_vec();
 
         let robot_link_radius = doc["robot_link_radius"].as_f64().unwrap();
 
         let mut cuboids: Vec<CuboidEnv> = Vec::new();
         let mut spheres: Vec<SphereEnv> = Vec::new();
+        let mut pcds: Vec<PCDEnv> = Vec::new();
 
         if cuboids_option.is_some() {
             let cuboids_list = cuboids_option.unwrap();
@@ -405,31 +407,30 @@ impl EnvCollisionFileParser {
                 let rx = rots[0].as_f64().unwrap();
                 let ry = rots[1].as_f64().unwrap();
                 let rz = rots[2].as_f64().unwrap();
-                let t = nalgebra::Rotation3::from_euler_angles(rx, ry, rz);
                 // println!("Rotation matrix: {:?}", t);
 
+                let mut points: Vec<SphereEnv> = Vec::new();
                 let parent_path = Path::new(fp2.as_str()).parent().unwrap().to_str().unwrap();
                 let point_cloud_path = format!("{}/{}", parent_path, point_cloud_list[i]["file"].as_str().unwrap());
                 let point_cloud_file = File::open(point_cloud_path).unwrap();
                 let lines: Vec<Result<String, io::Error>> = io::BufReader::new(point_cloud_file).lines().collect();
                 for line in lines {
                     if let Ok(l) = line {
-                        let data: Vec<&str> = l.split(" ").collect();
+                        let data: Vec<&str> = l.split(' ').collect();
                         if data.len() >= 3 && data[0].parse::<f64>().is_ok() && data[1].parse::<f64>().is_ok() && data[2].parse::<f64>().is_ok() {
                             let x = data[0].parse::<f64>().unwrap();
                             let y = data[1].parse::<f64>().unwrap();
                             let z = data[2].parse::<f64>().unwrap();
                             // println!("Point: ({}, {}, {})", x, y, z);
-                            let pt_rot = t * nalgebra::Vector3::new(x, y, z);
-                            spheres.push(SphereEnv::new(name.clone(), radius, tx + sx * pt_rot[0], 
-                                ty + sy * pt_rot[1], tz + sz * pt_rot[2], is_dynamic));
+                            points.push(SphereEnv::new(name.clone(), radius, sx * x, sy * y, sz * z, false));
                         }
                     }
                 }
+                pcds.push(PCDEnv::new(name, rx, ry, rz, tx, ty, tz, is_dynamic, points))
             }
         }
 
-        Self{robot_link_radius, cuboids, spheres}
+        Self{robot_link_radius, cuboids, spheres, pcds}
     }
 }
 
