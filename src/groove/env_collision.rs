@@ -4,7 +4,6 @@ use nalgebra::geometry::{Translation3, UnitQuaternion, Quaternion};
 use ncollide3d::pipeline::{*};
 use ncollide3d::shape::{*};
 use ncollide3d::query::{*};
-use ncollide3d::transformation::convex_hull;
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
@@ -68,7 +67,7 @@ impl RelaxedIKEnvCollision {
         others_groups.set_blacklist(&[2]);
         others_groups.set_whitelist(&[1]);
 
-        let proximity_query = GeometricQueryType::Proximity(1.2 * link_radius);
+        let proximity_query = GeometricQueryType::Proximity(1.0 * link_radius);
 
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
@@ -124,15 +123,20 @@ impl RelaxedIKEnvCollision {
 
         for i in 0..pcd_obstacles.len() {
             let pcd_obs = &pcd_obstacles[i];
-            let mut shapes: Vec<(Isometry3<f64>, ShapeHandle<f64>)> = Vec::new();
+            // let mut shapes: Vec<(Isometry3<f64>, ShapeHandle<f64>)> = Vec::new();
+            // for sphere_obs in &pcd_obs.points {
+            //     let sphere = ShapeHandle::new(Ball::new(sphere_obs.radius));
+            //     let sphere_ts = Translation3::new(sphere_obs.tx, sphere_obs.ty, sphere_obs.tz);
+            //     let sphere_rot = UnitQuaternion::identity();
+            //     let sphere_pos = Isometry3::from_parts(sphere_ts, sphere_rot);
+            //     shapes.push((sphere_pos, sphere));
+            // }
+            let mut points: Vec<Point3<f64>> = Vec::new();
             for sphere_obs in &pcd_obs.points {
-                let sphere = ShapeHandle::new(Ball::new(sphere_obs.radius));
-                let sphere_ts = Translation3::new(sphere_obs.tx, sphere_obs.ty, sphere_obs.tz);
-                let sphere_rot = UnitQuaternion::identity();
-                let sphere_pos = Isometry3::from_parts(sphere_ts, sphere_rot);
-                shapes.push((sphere_pos, sphere));
+                points.push(Point3::new(sphere_obs.tx, sphere_obs.ty, sphere_obs.tz));
             }
-            let pcd = ShapeHandle::new(Compound::new(shapes));
+            // let pcd = ShapeHandle::new(Compound::new(shapes));
+            let pcd = ShapeHandle::new(ConvexHull::try_from_points(&points).unwrap());
             let pcd_ts = Translation3::new(pcd_obs.tx, pcd_obs.ty, pcd_obs.tz);
             let pcd_rot = UnitQuaternion::from_euler_angles(pcd_obs.rx, pcd_obs.ry, pcd_obs.rz);
             let pcd_pos = Isometry3::from_parts(pcd_ts, pcd_rot);
