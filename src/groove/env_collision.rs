@@ -67,7 +67,7 @@ impl RelaxedIKEnvCollision {
         others_groups.set_blacklist(&[2]);
         others_groups.set_whitelist(&[1]);
 
-        let proximity_query = GeometricQueryType::Proximity(1.0 * link_radius);
+        let proximity_query = GeometricQueryType::Proximity(1.2 * link_radius);
 
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
