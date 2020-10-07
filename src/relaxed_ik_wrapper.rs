@@ -28,11 +28,7 @@ pub unsafe extern "C" fn dynamic_obstacle_cb(name: *const c_char, pos_arr: *cons
     let rot = UnitQuaternion::from_quaternion(tmp_q);
     let pos = Isometry3::from_parts(ts, rot);
 
-    // println!("{:?}", pos);
-
     R.lock().unwrap().vars.env_collision.update_dynamic_obstacle(name_str, pos);
-
-    // println!("O Thread ID: {:?}", std::thread::current().id());
 }
 
 #[no_mangle]
@@ -57,13 +53,7 @@ pub unsafe extern "C" fn solve(pos_arr: *const c_double, pos_length: c_int,
 fn solve_helper(pos_goals: Vec<f64>, quat_goals: Vec<f64>) -> Vec<f64> {
     let arc = Arc::new(Mutex::new(EEPoseGoalsSubscriber::new()));
     let mut g = arc.lock().unwrap();
-
-    // println!("S Thread ID: {:?}", std::thread::current().id());
-
-    // for o in (*r.borrow()).vars.env_collision.world.objects.iter() {
-    //     println!("Helper = Name: {:?}, Position: {:?}", o.1.data().name, o.1.position());
-    // }
-
+    
     for i in 0..R.lock().unwrap().vars.robot.num_chains {
         g.pos_goals.push( Vector3::new(pos_goals[3*i], pos_goals[3*i+1], pos_goals[3*i+2]) );
         let tmp_q = Quaternion::new(quat_goals[4*i+3], quat_goals[4*i], quat_goals[4*i+1], quat_goals[4*i+2]);

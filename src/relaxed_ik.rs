@@ -105,7 +105,7 @@ impl RelaxedIK {
         let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
         for i in 0..self.vars.robot.num_chains {
             let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-            let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+            let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
             if pos_error > max_pos_error { max_pos_error = pos_error; }
             if rot_error > max_rot_error { max_rot_error = rot_error; }
         }
@@ -117,7 +117,7 @@ impl RelaxedIK {
             let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
             for i in 0..self.vars.robot.num_chains {
                 let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-                let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+                let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
                 if pos_error > max_pos_error { max_pos_error = pos_error; }
                 if rot_error > max_rot_error { max_rot_error = rot_error; }
             }
@@ -151,7 +151,7 @@ impl RelaxedIK {
         let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
         for i in 0..self.vars.robot.num_chains {
             let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-            let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+            let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
             if pos_error > max_pos_error {max_pos_error = pos_error;}
             if rot_error > max_rot_error {max_rot_error = rot_error;}
         }
