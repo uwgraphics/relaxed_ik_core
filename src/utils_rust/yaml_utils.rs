@@ -432,6 +432,64 @@ impl EnvCollisionFileParser {
 
         Self{robot_link_radius, cuboids, spheres, pcds}
     }
+
+    pub fn from_rmos_path(fp: String) -> Self {
+        let fp2 = fp.clone();
+        let robot_link_radius = 0.05;
+        
+        let mut cuboids: Vec<CuboidEnv> = Vec::new();
+        let mut spheres: Vec<SphereEnv> = Vec::new();
+        let mut pcds: Vec<PCDEnv> = Vec::new();
+
+        let rmos_file = File::open(fp).unwrap();
+        let lines: Vec<Result<String, io::Error>> = io::BufReader::new(rmos_file).lines().collect();
+        let mut file_break = false;
+        for line in lines {
+            if let Ok(l) = line {
+                let first_char = l.chars().next().unwrap();
+                if first_char == '#' {
+                    file_break = true;
+                    continue;
+                }
+                if first_char.is_alphanumeric() {
+                    if !file_break {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+                let data_no_comment: Vec<&str> = l.split("//").collect();
+                let data: Vec<&str> = data_no_comment[0].trim().split(';').collect();
+                let name = data[0].to_string();
+                // let scale = data[1].parse::<f64>().unwrap();
+                let motion_file = data[2].to_string();
+                let mut is_dynamic = true;
+                if motion_file == "static" {
+                    is_dynamic = false;
+                }
+                let mut points: Vec<SphereEnv> = Vec::new();
+                let parent_path = Path::new(fp2.as_str()).parent().unwrap().to_str().unwrap();
+                let point_cloud_path = format!("{}/../point_cloud_files/{}", parent_path, name);
+                let point_cloud_file = File::open(point_cloud_path).unwrap();
+                let point_lines: Vec<Result<String, io::Error>> = io::BufReader::new(point_cloud_file).lines().collect();
+                for point_line in point_lines {
+                    if let Ok(point) = point_line {
+                        let point_data: Vec<&str> = point.split(',').collect();
+                        if point_data.len() >= 3 && point_data[0].parse::<f64>().is_ok() && point_data[1].parse::<f64>().is_ok() && point_data[2].parse::<f64>().is_ok() {
+                            let x = point_data[0].parse::<f64>().unwrap();
+                            let y = point_data[1].parse::<f64>().unwrap();
+                            let z = point_data[2].parse::<f64>().unwrap();
+                            // println!("Point: ({}, {}, {})", x, y, z);
+                            points.push(SphereEnv::new(name.clone(), 0.001, x, y, z, false));
+                        }
+                    }
+                }
+                pcds.push(PCDEnv::new(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, is_dynamic, points))
+            }
+        }
+
+        Self{robot_link_radius, cuboids, spheres, pcds}
+    }
 }
 
 

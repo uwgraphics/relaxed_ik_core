@@ -72,8 +72,8 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
-        let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_path);
+        let env_collision_path = get_path_to_src() + "rmos_files/test.rmos";
+        let env_collision_file = EnvCollisionFileParser::from_rmos_path(env_collision_path);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
 
@@ -113,8 +113,8 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
-        let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_path);
+        let env_collision_path = get_path_to_src() + "rmos_files/test.rmos";
+        let env_collision_file = EnvCollisionFileParser::from_rmos_path(env_collision_path);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
 
