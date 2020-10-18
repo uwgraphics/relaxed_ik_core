@@ -23,25 +23,40 @@ impl ObjectiveMaster {
     }
 
     pub fn tune_weight_priors(&mut self, vars: &RelaxedIKVars) {
-        // for i in 0..self.num_chains {
-        //     let num_active_obstacles = vars.env_collision.active_obstacles[i].len() as f64;
-        //     let a = 1.0;
-        //     self.weight_priors[3*i] = 10.0 * (-a * num_active_obstacles).exp();
-        //     self.weight_priors[3*i+1] = 9.0 * (-a * num_active_obstacles).exp();
-        // }
+        let a = 0.05;
+        for i in 0..self.num_chains {
+            let mut score_max = 0.0;
+            for (option, score) in &vars.env_collision.active_obstacles[i] {
+                if *score > score_max {
+                    score_max = *score;
+                }
+            }
+            // match ee quat goal objectives
+            self.weight_priors[3*i+1] = a / (a + score_max);
+        }
         // println!("Weights: {:?}", self.weight_priors);
     }
 
-    pub fn relaxed_ik(num_chains: usize) -> Self {
+    pub fn relaxed_ik(num_chains: usize, objective_mode: String) -> Self {
         let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
             weight_priors.push(1.0);
             objectives.push(Box::new(MatchEEQuatGoals::new(i)));
-            weight_priors.push(1.0);
+            if objective_mode == "ECA3" {
+                weight_priors.push(0.0);
+            } else if objective_mode == "ECAA" {
+                weight_priors.push(1.0);
+            } else {
+                weight_priors.push(1.0);
+            }
             objectives.push(Box::new(EnvCollision::new(i)));
-            weight_priors.push(1.0);
+            if objective_mode == "noECA" {
+                weight_priors.push(0.0);
+            } else {
+                weight_priors.push(1.0);
+            }
         }
         objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(7.0);
         objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(2.0);

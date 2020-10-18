@@ -30,7 +30,7 @@ impl RelaxedIK {
 
     pub fn from_yaml_path(fp: String, mode: usize) -> Self {
         let vars = RelaxedIKVars::from_yaml_path(fp.clone(), true, true);
-        let mut om = ObjectiveMaster::relaxed_ik(vars.robot.num_chains);
+        let mut om = ObjectiveMaster::relaxed_ik(vars.robot.num_chains, vars.objective_mode.clone());
         if mode == 0 {
             om = ObjectiveMaster::standard_ik(vars.robot.num_chains);
         }
@@ -65,7 +65,9 @@ impl RelaxedIK {
 
         let in_collision = self.vars.update_collision_world();
         if !in_collision {
-            self.om.tune_weight_priors(&self.vars);
+            if self.vars.objective_mode == "ECAA" {
+                self.om.tune_weight_priors(&self.vars);
+            }
             self.groove.optimize(&mut out_x, &self.vars, &self.om, 100);
             self.vars.update(out_x.clone());  
         }  

@@ -42,7 +42,7 @@ pub struct RelaxedIKEnvCollision {
     pub link_handles: Vec<Vec<CollisionObjectSlabHandle>>,
     pub dyn_obstacle_handles: Vec<(CollisionObjectSlabHandle, String)>,
     pub active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>>,
-    pub active_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>>,
+    pub active_obstacles: Vec<Vec<(Option<CollisionObjectSlabHandle>, f64)>>,
 }
 
 impl RelaxedIKEnvCollision {
@@ -72,10 +72,10 @@ impl RelaxedIKEnvCollision {
         let mut world = CollisionWorld::new(0.0);
         let mut link_handles: Vec<Vec<CollisionObjectSlabHandle>> = Vec::new();
         let mut active_pairs: Vec<BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>>> = Vec::new();
-        let mut active_obstacles: Vec<Vec<Option<CollisionObjectSlabHandle>>> = Vec::new();
+        let mut active_obstacles: Vec<Vec<(Option<CollisionObjectSlabHandle>, f64)>> = Vec::new();
         for arm_idx in 0..frames.len() {
             let mut handles: Vec<CollisionObjectSlabHandle> = Vec::new();
-            let mut obstacles: Vec<Option<CollisionObjectSlabHandle>> = Vec::new();
+            let mut obstacles: Vec<(Option<CollisionObjectSlabHandle>, f64)> = Vec::new();
             let pair: BTreeMap<CollisionObjectSlabHandle, Vec<CollisionObjectSlabHandle>> = BTreeMap::new();
             let last_elem = frames[arm_idx].0.len() - 1;
             for i in 0..last_elem {
@@ -86,7 +86,7 @@ impl RelaxedIKEnvCollision {
                 let link_data = CollisionObjectData::new(format!("Link {}", i), LinkData::new(true, arm_idx as i32));
                 let handle = world.add(segment_pos, segment, link_groups, proximity_query, link_data);
                 handles.push(handle.0);
-                obstacles.push(None);
+                obstacles.push((None, 0.0));
             }
             link_handles.push(handles);
             active_pairs.push(pair);
