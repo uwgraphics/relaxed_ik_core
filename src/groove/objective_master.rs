@@ -24,6 +24,7 @@ impl ObjectiveMaster {
 
     pub fn tune_weight_priors(&mut self, vars: &RelaxedIKVars) {
         let a = 0.05;
+        let cap = 0.001;
         for i in 0..self.num_chains {
             let mut score_max = 0.0;
             for (option, score) in &vars.env_collision.active_obstacles[i] {
@@ -32,9 +33,15 @@ impl ObjectiveMaster {
                 }
             }
             // match ee quat goal objectives
-            self.weight_priors[3*i+1] = a / (a + score_max);
+            let weight_cur = self.weight_priors[3*i+1];
+            let weight_delta = a / (a + score_max) - weight_cur;
+            if weight_delta.abs() < cap {
+                self.weight_priors[3*i+1] += weight_delta;
+            } else {
+                self.weight_priors[3*i+1] += cap * weight_delta / weight_delta.abs() ;
+                println!("!!!!!!!!");
+            }
         }
-        // println!("Weights: {:?}", self.weight_priors);
     }
 
     pub fn relaxed_ik(num_chains: usize, objective_mode: String) -> Self {
