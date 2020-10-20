@@ -51,6 +51,7 @@ pub struct RelaxedIKVars {
     pub collision_nn: CollisionNN,
     pub env_collision: RelaxedIKEnvCollision,
     pub objective_mode: String,
+    pub num_env_collision: i32,
 }
 impl RelaxedIKVars {
     pub fn from_yaml_path(fp: String, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
@@ -81,10 +82,12 @@ impl RelaxedIKVars {
         let objective_mode_path = get_path_to_src() + "rmos_files/objective_mode";
         let objective_mode = get_file_contents(objective_mode_path);
 
+        let num_env_collision = 0;
+
         RelaxedIKVars{robot, sampler, init_state: ifp.starting_config.clone(), xopt: ifp.starting_config.clone(),
             prev_state: ifp.starting_config.clone(), prev_state2: ifp.starting_config.clone(), prev_state3: ifp.starting_config.clone(),
             goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, collision_nn, 
-            env_collision, objective_mode}
+            env_collision, objective_mode, num_env_collision}
     }
 
     pub fn from_yaml_path_with_init(fp: String, init_state: Vec<f64>, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
@@ -124,10 +127,12 @@ impl RelaxedIKVars {
         let objective_mode_path = get_path_to_src() + "rmos_files/objective_mode";
         let objective_mode = get_file_contents(objective_mode_path);
 
+        let num_env_collision = 0;
+
         RelaxedIKVars{robot, sampler, init_state: init_state.clone(), xopt: init_state.clone(),
             prev_state: init_state.clone(), prev_state2: init_state.clone(), prev_state3: init_state.clone(),
             goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, 
-            collision_nn, env_collision, objective_mode}
+            collision_nn, env_collision, objective_mode, num_env_collision}
     }
 
     pub fn update(&mut self, xopt: Vec<f64>) {
@@ -138,9 +143,6 @@ impl RelaxedIKVars {
     }
 
     pub fn update_collision_world(&mut self) -> bool {
-        if self.objective_mode == "noECA" {
-            return false;
-        }
         // let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
         self.env_collision.update_links(&frames);
@@ -228,7 +230,13 @@ impl RelaxedIKVars {
                     if dis > 0.0 {
                         sum += a / (dis + link_radius).powi(20);
                     } else {
-                        return true;
+                        self.num_env_collision += 1;
+                        println!("Number of environment collisions: {}", self.num_env_collision);
+                        if self.objective_mode != "noECA" {
+                            return true;
+                        } else {
+                            break;
+                        }
                     }
                 }
                 // println!("VARS -> {:?}, Sum: {:?}", obstacle.data().name, sum);
@@ -237,7 +245,9 @@ impl RelaxedIKVars {
                 }
             }
             // println!("Number of active obstacles: {}", active_obstacles.len());
-            self.env_collision.active_obstacles[arm_idx] = active_obstacles;
+            if self.objective_mode != "noECA" {
+                self.env_collision.active_obstacles[arm_idx] = active_obstacles;
+            }
         }
         
         // let end = PreciseTime::now();
