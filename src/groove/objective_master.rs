@@ -38,8 +38,7 @@ impl ObjectiveMaster {
             if weight_delta.abs() < cap {
                 self.weight_priors[3*i+1] += weight_delta;
             } else {
-                self.weight_priors[3*i+1] += cap * weight_delta / weight_delta.abs() ;
-                println!("!!!!!!!!");
+                self.weight_priors[3*i+1] += cap * weight_delta / weight_delta.abs();
             }
         }
     }
