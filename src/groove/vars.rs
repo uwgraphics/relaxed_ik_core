@@ -74,12 +74,17 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "rmos_files/test.rmos";
-        let env_collision_file = EnvCollisionFileParser::from_rmos_path(env_collision_path);
+        // FOR TESTING
+        let rmos_path = get_path_to_src() + "relaxed_ik_core/config/env_collision";
+        let rmos_name = get_file_contents(rmos_path);
+        let robot_name_vec: Vec<&str> = ifp.urdf_file_name.split(".").collect();
+        let robot_name: Vec<&str> = robot_name_vec[0].split("_").collect();
+        let rmos_file = get_path_to_src() + "rmos_files/" + robot_name[0] + "/" + &rmos_name;
+        let env_collision_file = EnvCollisionFileParser::from_rmos_path(rmos_file, robot_name[0].to_string());
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
         // FOR TESTING
-        let objective_mode_path = get_path_to_src() + "rmos_files/objective_mode";
+        let objective_mode_path = get_path_to_src() + "relaxed_ik_core/config/objective_mode";
         let objective_mode = get_file_contents(objective_mode_path);
 
         let num_env_collision = 0;
@@ -119,14 +124,19 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        let env_collision_path = get_path_to_src() + "rmos_files/test.rmos";
-        let env_collision_file = EnvCollisionFileParser::from_rmos_path(env_collision_path);
+        // FOR TESTING
+        let rmos_path = get_path_to_src() + "relaxed_ik_core/config/env_collision";
+        let rmos_name = get_file_contents(rmos_path);
+        let robot_name_vec: Vec<&str> = ifp.urdf_file_name.split(".").collect();
+        let robot_name: Vec<&str> = robot_name_vec[0].split("_").collect();
+        let rmos_file = get_path_to_src() + "rmos_files/" + robot_name[0] + "/" + &rmos_name;
+        let env_collision_file = EnvCollisionFileParser::from_rmos_path(rmos_file, robot_name[0].to_string());
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
         // FOR TESTING
-        let objective_mode_path = get_path_to_src() + "rmos_files/objective_mode";
+        let objective_mode_path = get_path_to_src() + "relaxed_ik_core/config/objective_mode";
         let objective_mode = get_file_contents(objective_mode_path);
-
+        
         let num_env_collision = 0;
 
         RelaxedIKVars{robot, sampler, init_state: init_state.clone(), xopt: init_state.clone(),
@@ -209,12 +219,13 @@ impl RelaxedIKVars {
 
         self.env_collision.world.update();
 
+        let link_radius = self.env_collision.link_radius;
+        let penalty_cutoff: f64 = link_radius * 2.0;
+        let a = penalty_cutoff.powi(2);
+        let filter_cutoff = 3;
         for arm_idx in 0..frames.len() {
-            let link_radius = self.env_collision.link_radius;
-            let penalty_cutoff: f64 = link_radius * 2.0;
-            let a = 0.01 * (penalty_cutoff.powi(20));
             // let mut sum_max: f64 = 0.0;
-            let mut active_obstacles: Vec<(Option<CollisionObjectSlabHandle>, f64)> = Vec::new();
+            let mut active_candidates: Vec<(Option<CollisionObjectSlabHandle>, f64)> = Vec::new();
             for key in self.env_collision.active_pairs[arm_idx].keys() {
                 let obstacle = self.env_collision.world.objects.get(*key).unwrap();
                 // println!("Obstacle: {:?}", obstacle.data());
@@ -228,7 +239,7 @@ impl RelaxedIKVars {
                     let dis = distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
                     // println!("VARS -> {:?}, Link{}, Distance: {:?}", obstacle.data(), j, dis);
                     if dis > 0.0 {
-                        sum += a / (dis + link_radius).powi(20);
+                        sum += a / (dis + link_radius).powi(2);
                     } else {
                         self.num_env_collision += 1;
                         println!("Number of environment collisions: {}", self.num_env_collision);
@@ -239,14 +250,18 @@ impl RelaxedIKVars {
                         }
                     }
                 }
-                // println!("VARS -> {:?}, Sum: {:?}", obstacle.data().name, sum);
-                if sum > 0.02 {
-                    active_obstacles.push((Some(*key), sum));
-                }
+                active_candidates.push((Some(*key), sum));
             }
+
             // println!("Number of active obstacles: {}", active_obstacles.len());
             if self.objective_mode != "noECA" {
-                self.env_collision.active_obstacles[arm_idx] = active_obstacles;
+                if active_candidates.len() > filter_cutoff {
+                    active_candidates.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+                    let active_obstacles = active_candidates[0..filter_cutoff].iter().cloned().collect();
+                    self.env_collision.active_obstacles[arm_idx] = active_obstacles;
+                } else {
+                    self.env_collision.active_obstacles[arm_idx] = active_candidates;
+                }
             }
         }
         

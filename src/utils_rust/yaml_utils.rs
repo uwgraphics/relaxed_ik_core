@@ -433,7 +433,7 @@ impl EnvCollisionFileParser {
         Self{robot_link_radius, cuboids, spheres, pcds}
     }
 
-    pub fn from_rmos_path(fp: String) -> Self {
+    pub fn from_rmos_path(fp: String, robot_name: String) -> Self {
         let fp2 = fp.clone();
         let robot_link_radius = 0.05;
         
@@ -469,7 +469,7 @@ impl EnvCollisionFileParser {
                 }
                 let mut points: Vec<SphereEnv> = Vec::new();
                 let parent_path = Path::new(fp2.as_str()).parent().unwrap().to_str().unwrap();
-                let point_cloud_path = format!("{}/../point_cloud_files/{}", parent_path, name);
+                let point_cloud_path = format!("{}/../../geometry_files/{}/{}", parent_path, robot_name, name);
                 let point_cloud_file = File::open(point_cloud_path).unwrap();
                 let point_lines: Vec<Result<String, io::Error>> = io::BufReader::new(point_cloud_file).lines().collect();
                 for point_line in point_lines {

@@ -146,7 +146,7 @@ impl ObjectiveTrait for EnvCollision {
         let mut x_val: f64 = 0.0;
         let link_radius = v.env_collision.link_radius;
         let penalty_cutoff: f64 = link_radius * 2.0;
-        let a = 0.01 * (penalty_cutoff.powi(20));
+        let a = penalty_cutoff.powi(2);
         for (option, score) in &v.env_collision.active_obstacles[self.arm_idx] {
             if let Some(handle) = option {
                 let mut sum: f64 = 0.0;
@@ -159,7 +159,7 @@ impl ObjectiveTrait for EnvCollision {
                     let segment_pos = nalgebra::one();
                     let dis = query::distance(obstacle.position(), obstacle.shape().deref(), &segment_pos, &segment) - link_radius;
                     // println!("Obstacle: {}, Link: {}, Distance: {:?}", obstacle.data().name, i, dis);
-                    sum += a / (dis + link_radius).powi(20);
+                    sum += a / (dis + link_radius).powi(2);
                 }
                 // println!("OBJECTIVE -> {:?}, Sum: {:?}", obstacle.data().name, sum);
                 x_val += sum;
