@@ -10,6 +10,7 @@ use ncollide3d::query::{*};
 use ncollide3d::shape::{*};
 use time::PreciseTime;
 use std::ops::Deref;
+use std::fs::write;
 
 #[derive(Clone, Debug)]
 pub struct Vars {
@@ -242,7 +243,8 @@ impl RelaxedIKVars {
                         sum += a / (dis + link_radius).powi(2);
                     } else {
                         self.num_env_collision += 1;
-                        println!("Number of environment collisions: {}", self.num_env_collision);
+                        // println!("Number of environment collisions: {}", self.num_env_collision);
+                        write("num_env_collision", self.num_env_collision.to_string()).unwrap();
                         if self.objective_mode != "noECA" {
                             return true;
                         } else {
