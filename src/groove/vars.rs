@@ -82,8 +82,13 @@ impl RelaxedIKVars {
         let robot_name: Vec<&str> = robot_name_vec[0].split("_").collect();
         let rmos_file = get_path_to_src() + "rmos_files/" + robot_name[0] + "/" + &rmos_name;
         let env_collision_file = EnvCollisionFileParser::from_rmos_path(rmos_file, robot_name[0].to_string());
+        // let env_collision_file_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
+        // let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_file_path);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
+        // let start = PreciseTime::now();
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
+        // let end = PreciseTime::now();
+        // println!("Loading the collision world takes {} seconds", start.to(end));
         // FOR TESTING
         let objective_mode_path = get_path_to_src() + "relaxed_ik_core/config/objective_mode";
         let objective_mode = get_file_contents(objective_mode_path);

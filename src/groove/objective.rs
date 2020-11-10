@@ -169,7 +169,7 @@ impl ObjectiveTrait for EnvCollision {
         // let end = PreciseTime::now();
         // println!("Obstacles calculating takes {}", start.to(end));
 
-        groove_loss(x_val, 0., 2, 2.5, 0.0035, 4)
+        groove_loss(x_val, 0., 2, 3.5, 0.00005, 4)
     }
 
     fn call_lite(&self, x: &[f64], v: &vars::RelaxedIKVars, ee_poses: &Vec<(nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>)>) -> f64 {
