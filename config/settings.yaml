@@ -1,11 +1,16 @@
 # Please put the information of the robot and all the obstacles in this file
 
 loaded_robot:
-  name: ur5_info.yaml # please enter the name of the corresponding info file
+  name: sawyer_info.yaml # please enter the name of the corresponding info file
   link_radius: 0.05 # by default
   objective_mode: ECA # please select from noECA, ECA, ECA3, and ECAA
-  input_device: keyboard # please select from keyboard and cartesian_path
+  # please type keyboard here if interactive control is desired; if you want to have
+  # the robot arm follow a cartesian path, put the animation file in the 
+  # animation_files folder and type the file name here
+  input_device: keyboard
 
+# for the animation entry of the obstacles, there are three options available:
+# static, interactive or [the name of an animation file].
 obstacles:
   cuboids:
     - name: box1
@@ -35,5 +40,5 @@ obstacles:
       scale: [2.0,2.0,2.0]
       translation: [1.0,-0.25,0.15]
       rotation: [1.57,0.0,-1.57]
-      animation: icratrace
+      animation: interactive
       file: bunny
