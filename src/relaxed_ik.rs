@@ -4,6 +4,7 @@ use crate::groove::objective_master::ObjectiveMaster;
 use crate::utils_rust::file_utils::{*};
 use crate::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use crate::utils_rust::transformations::{*};
+use crate::utils_rust::yaml_utils::{*};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use crate::utils_rust::sampler::ThreadSampler;
 use std::os::raw::{c_double, c_int};
@@ -43,8 +44,8 @@ impl RelaxedIK {
 
     pub fn from_loaded(mode: usize) -> Self {
         let path_to_src = get_path_to_src();
-        let fp1 = path_to_src +  "relaxed_ik_core/config/loaded_robot";
-        let info_file_name = get_file_contents(fp1);
+        let fp1 = path_to_src +  "relaxed_ik_core/config/settings.yaml";
+        let info_file_name = get_info_file_name(fp1);
         RelaxedIK::from_info_file_name(info_file_name.clone(), mode.clone())
     }
 

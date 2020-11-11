@@ -10,7 +10,6 @@ use ncollide3d::query::{*};
 use ncollide3d::shape::{*};
 use time::PreciseTime;
 use std::ops::Deref;
-use std::fs::write;
 
 #[derive(Clone, Debug)]
 pub struct Vars {
@@ -51,8 +50,7 @@ pub struct RelaxedIKVars {
     pub rotation_mode_relative: bool, // if false, will be absolute
     pub collision_nn: CollisionNN,
     pub env_collision: RelaxedIKEnvCollision,
-    pub objective_mode: String,
-    pub num_env_collision: i32,
+    pub objective_mode: String
 }
 impl RelaxedIKVars {
     pub fn from_yaml_path(fp: String, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
@@ -75,80 +73,17 @@ impl RelaxedIKVars {
         let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
         let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
 
-        // FOR TESTING
-        let rmos_path = get_path_to_src() + "relaxed_ik_core/config/env_collision";
-        let rmos_name = get_file_contents(rmos_path);
-        let robot_name_vec: Vec<&str> = ifp.urdf_file_name.split(".").collect();
-        let robot_name: Vec<&str> = robot_name_vec[0].split("_").collect();
-        let rmos_file = get_path_to_src() + "rmos_files/" + robot_name[0] + "/" + &rmos_name;
-        let env_collision_file = EnvCollisionFileParser::from_rmos_path(rmos_file, robot_name[0].to_string());
-        // let env_collision_file_path = get_path_to_src() + "env_collision_files/env_collision.yaml";
-        // let env_collision_file = EnvCollisionFileParser::from_yaml_path(env_collision_file_path);
+        let fp = get_path_to_src() + "relaxed_ik_core/config/settings.yaml";
+        let fp2 = fp.clone();
+        let env_collision_file = EnvCollisionFileParser::from_yaml_path(fp);
         let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
-        // let start = PreciseTime::now();
         let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
-        // let end = PreciseTime::now();
-        // println!("Loading the collision world takes {} seconds", start.to(end));
-        // FOR TESTING
-        let objective_mode_path = get_path_to_src() + "relaxed_ik_core/config/objective_mode";
-        let objective_mode = get_file_contents(objective_mode_path);
-
-        let num_env_collision = 0;
+        let objective_mode = get_objective_mode(fp2);
 
         RelaxedIKVars{robot, sampler, init_state: ifp.starting_config.clone(), xopt: ifp.starting_config.clone(),
             prev_state: ifp.starting_config.clone(), prev_state2: ifp.starting_config.clone(), prev_state3: ifp.starting_config.clone(),
             goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, collision_nn, 
-            env_collision, objective_mode, num_env_collision}
-    }
-
-    pub fn from_yaml_path_with_init(fp: String, init_state: Vec<f64>, position_mode_relative: bool, rotation_mode_relative: bool) -> Self {
-        let ifp = InfoFileParser::from_yaml_path(fp.clone());
-        let mut robot = Robot::from_yaml_path(fp.clone());
-        let num_chains = robot.num_chains;
-        let sampler = ThreadRobotSampler::new(robot.clone());
-
-        let mut goal_positions: Vec<Vector3<f64>> = Vec::new();
-        let mut goal_quats: Vec<UnitQuaternion<f64>> = Vec::new();
-
-        let init_ee_positions = robot.get_ee_positions(init_state.as_slice());
-        let init_ee_quats = robot.get_ee_quats(init_state.as_slice());
-
-        for i in 0..num_chains {
-            if position_mode_relative {
-                goal_positions.push(nalgebra::Vector3::identity());
-            } else {
-                goal_positions.push(init_ee_positions[i]);
-            }
-
-            if rotation_mode_relative {
-                goal_quats.push(nalgebra::UnitQuaternion::identity());
-            } else {
-                goal_quats.push(init_ee_quats[i]);
-            }
-        }
-
-        let collision_nn_path = get_path_to_src()+ "relaxed_ik_core/config/collision_nn_rust/" + ifp.collision_nn_file.as_str() + ".yaml";
-        let collision_nn = CollisionNN::from_yaml_path(collision_nn_path);
-
-        // FOR TESTING
-        let rmos_path = get_path_to_src() + "relaxed_ik_core/config/env_collision";
-        let rmos_name = get_file_contents(rmos_path);
-        let robot_name_vec: Vec<&str> = ifp.urdf_file_name.split(".").collect();
-        let robot_name: Vec<&str> = robot_name_vec[0].split("_").collect();
-        let rmos_file = get_path_to_src() + "rmos_files/" + robot_name[0] + "/" + &rmos_name;
-        let env_collision_file = EnvCollisionFileParser::from_rmos_path(rmos_file, robot_name[0].to_string());
-        let frames = robot.get_frames_immutable(&ifp.starting_config.clone());
-        let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
-        // FOR TESTING
-        let objective_mode_path = get_path_to_src() + "relaxed_ik_core/config/objective_mode";
-        let objective_mode = get_file_contents(objective_mode_path);
-        
-        let num_env_collision = 0;
-
-        RelaxedIKVars{robot, sampler, init_state: init_state.clone(), xopt: init_state.clone(),
-            prev_state: init_state.clone(), prev_state2: init_state.clone(), prev_state3: init_state.clone(),
-            goal_positions, goal_quats, init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative, 
-            collision_nn, env_collision, objective_mode, num_env_collision}
+            env_collision, objective_mode}
     }
 
     pub fn update(&mut self, xopt: Vec<f64>) {
@@ -159,7 +94,6 @@ impl RelaxedIKVars {
     }
 
     pub fn update_collision_world(&mut self) -> bool {
-        // let start = PreciseTime::now();
         let frames = self.robot.get_frames_immutable(&self.xopt);
         self.env_collision.update_links(&frames);
         for event in self.env_collision.world.proximity_events() {
@@ -246,15 +180,10 @@ impl RelaxedIKVars {
                     // println!("VARS -> {:?}, Link{}, Distance: {:?}", obstacle.data(), j, dis);
                     if dis > 0.0 {
                         sum += a / (dis + link_radius).powi(2);
+                    } else if self.objective_mode != "noECA" {
+                        return true;
                     } else {
-                        self.num_env_collision += 1;
-                        // println!("Number of environment collisions: {}", self.num_env_collision);
-                        write("num_env_collision", self.num_env_collision.to_string()).unwrap();
-                        if self.objective_mode != "noECA" {
-                            return true;
-                        } else {
-                            break;
-                        }
+                        break;
                     }
                 }
                 active_candidates.push((Some(*key), sum));
@@ -272,8 +201,6 @@ impl RelaxedIKVars {
             }
         }
         
-        // let end = PreciseTime::now();
-        // println!("Update collision world takes {}", start.to(end));
         return false;
     }
 

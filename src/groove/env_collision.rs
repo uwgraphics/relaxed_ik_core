@@ -3,7 +3,6 @@ use nalgebra::{Vector3, Isometry3, Point3};
 use nalgebra::geometry::{Translation3, UnitQuaternion, Quaternion};
 use ncollide3d::pipeline::{*};
 use ncollide3d::shape::{*};
-use ncollide3d::query::{*};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
@@ -146,9 +145,6 @@ impl RelaxedIKEnvCollision {
                 dyn_obstacle_handles.push((pcd_handle.0, pcd_handle.1.data().name.clone()));
             }
         }
-
-        // Register our handlers.
-        // world.register_proximity_handler("ProximityMessage", ProximityMessage);
         
         return Self{world, link_radius, link_handles, dyn_obstacle_handles, active_pairs, active_obstacles};
     }
@@ -181,9 +177,5 @@ impl RelaxedIKEnvCollision {
                 break;
             }
         }
-        
-        // println!("Object: {:?}", co.data());
-        // println!("Pos: {:?}", co.position());
-        // self.world.update();
     }
 }
