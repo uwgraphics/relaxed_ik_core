@@ -1,16 +1,27 @@
-# Please put the information of the robot and all the obstacles in this file
-
+# Enter the information of the robot you want to run RelaxedIK on
 loaded_robot:
   name: sawyer_info.yaml # please enter the name of the corresponding info file
   link_radius: 0.05 # by default
-  objective_mode: ECA # please select from noECA, ECA, ECA3, and ECAA
+  # please select from noECA, ECA, ECA3, and ECAA
+  # noECA: doesn't incorporate environment collision avoidance
+  # ECA (by default): incorporates environment collision avoidance 
+  # ECA3: incorporates environment collision avoidance, but only considers end-effector position goal matching, 
+  #       and does not try to match the orientation of goals
+  # ECAA: incorporates environment collision avoidance, adaptively adjusts the weight on the orientation 
+  #       matching objectives on-the-fly, such that the importance of orientationmatching is reduced 
+  #       when the robot is close to a collision state and raised to its standard value  
+  #       when the robot is not close to a collision.
+  objective_mode: ECA 
   # please type keyboard here if interactive control is desired; if you want to have
   # the robot arm follow a cartesian path, put the animation file in the 
   # animation_files folder and type the file name here
   input_device: keyboard
 
-# for the animation entry of the obstacles, there are three options available:
-# static, interactive or [the name of an animation file].
+# scale: usually a list of three float numbers, while a single float number is sufficient for spheres
+# animation: there are three options available: static, interactive and [the name of an animation file]. 
+#            The option "interactive" means that you will be able to drag the obstacle around with your mouse. 
+#            If you want to drive the robot with an animation file, please make sure to put the corresponding 
+#            animation file in the animation_files folder
 obstacles:
   cuboids:
     - name: box1

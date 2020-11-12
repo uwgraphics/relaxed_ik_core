@@ -7,7 +7,7 @@ use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use std::{io, thread, time};
 
 fn main() {
-    println!("\nSolver initialized!\n");
+    println!("\nRelaxedIK initialized!\n");
 
     println!("Please enter the name of the robot: \n(Available options include baxter, hubo, hubo8, iiwa7, jaco7, panda, sawyer, ur5 and yumi.)");
     let mut name_buf = String::new();
