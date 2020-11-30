@@ -4,9 +4,9 @@ use crate::groove::objective_master::ObjectiveMaster;
 use crate::utils_rust::file_utils::{*};
 use crate::utils_rust::subscriber_utils::EEPoseGoalsSubscriber;
 use crate::utils_rust::transformations::{*};
+use crate::utils_rust::yaml_utils::{*};
 use nalgebra::{Vector3, UnitQuaternion, Quaternion};
 use crate::utils_rust::sampler::ThreadSampler;
-
 use std::os::raw::{c_double, c_int};
 
 #[repr(C)]
@@ -31,7 +31,7 @@ impl RelaxedIK {
 
     pub fn from_yaml_path(fp: String, mode: usize) -> Self {
         let vars = RelaxedIKVars::from_yaml_path(fp.clone(), true, true);
-        let mut om = ObjectiveMaster::relaxed_ik(vars.robot.num_chains);
+        let mut om = ObjectiveMaster::relaxed_ik(vars.robot.num_chains, vars.objective_mode.clone());
         if mode == 0 {
             om = ObjectiveMaster::standard_ik(vars.robot.num_chains);
         }
@@ -44,8 +44,8 @@ impl RelaxedIK {
 
     pub fn from_loaded(mode: usize) -> Self {
         let path_to_src = get_path_to_src();
-        let fp1 = path_to_src +  "relaxed_ik_core/config/loaded_robot";
-        let info_file_name = get_file_contents(fp1).trim().to_string();
+        let fp1 = path_to_src +  "relaxed_ik_core/config/settings.yaml";
+        let info_file_name = get_info_file_name(fp1);
         RelaxedIK::from_info_file_name(info_file_name.clone(), mode.clone())
     }
 
@@ -64,10 +64,14 @@ impl RelaxedIK {
             }
         }
 
-        self.groove.optimize(&mut out_x, &self.vars, &self.om, 100);
-
-        self.vars.update(out_x.clone());
-
+        let in_collision = self.vars.update_collision_world();
+        if !in_collision {
+            if self.vars.objective_mode == "ECAA" {
+                self.om.tune_weight_priors(&self.vars);
+            }
+            self.groove.optimize(&mut out_x, &self.vars, &self.om, 100);
+            self.vars.update(out_x.clone());  
+        }  
         out_x
     }
 
@@ -104,7 +108,7 @@ impl RelaxedIK {
         let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
         for i in 0..self.vars.robot.num_chains {
             let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-            let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+            let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
             if pos_error > max_pos_error { max_pos_error = pos_error; }
             if rot_error > max_rot_error { max_rot_error = rot_error; }
         }
@@ -116,13 +120,14 @@ impl RelaxedIK {
             let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
             for i in 0..self.vars.robot.num_chains {
                 let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-                let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+                let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
                 if pos_error > max_pos_error { max_pos_error = pos_error; }
                 if rot_error > max_rot_error { max_rot_error = rot_error; }
             }
         }
 
         self.vars.update(out_x.clone());
+        self.vars.update_collision_world();
 
         out_x
     }
@@ -149,7 +154,7 @@ impl RelaxedIK {
         let ee_poses = self.vars.robot.get_ee_pos_and_quat_immutable(&out_x);
         for i in 0..self.vars.robot.num_chains {
             let pos_error = (self.vars.goal_positions[i] - ee_poses[i].0).norm();
-            let rot_error = (angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone()));
+            let rot_error = angle_between(self.vars.goal_quats[i].clone(), ee_poses[i].1.clone());
             if pos_error > max_pos_error {max_pos_error = pos_error;}
             if rot_error > max_rot_error {max_rot_error = rot_error;}
         }

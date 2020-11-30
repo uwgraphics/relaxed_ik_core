@@ -3,7 +3,10 @@ use std::io::prelude::*;
 use yaml_rust::{YamlLoader, Yaml};
 use nalgebra;
 use nalgebra::{DMatrix, DVector};
-use crate::utils_rust::shape_parser_utils::{Cuboid, Sphere};
+use crate::utils_rust::file_utils::{*};
+use crate::utils_rust::shape_parser_utils::{*};
+use std::path::Path;
+use std::io;
 
 pub fn get_yaml_obj(fp: String) -> Vec<Yaml> {
     let mut file = File::open(fp.as_str()).unwrap();
@@ -32,7 +35,7 @@ pub struct InfoFileParser {
     pub disp_offsets: Vec<nalgebra::Vector3<f64>>,
     pub rot_offsets: Vec<Vec<Vec<f64>>>,
     pub joint_types: Vec<Vec<String>>,
-    pub joint_state_define_func_file: String,
+    pub joint_state_define_func_file: String
 }
 impl InfoFileParser {
     pub fn from_yaml_path(fp: String) -> InfoFileParser {
@@ -136,7 +139,6 @@ impl InfoFileParser {
                 joint_types[i].push(String::from(joint_types_arr2[j].as_str().unwrap() ) );
             }
         }
-
 
         InfoFileParser{urdf_file_name, fixed_frame, joint_names, joint_ordering, ee_fixed_joints, starting_config, collision_file_name, collision_nn_file, path_to_src, axis_types, velocity_limits,
             joint_limits, displacements, disp_offsets, rot_offsets, joint_types, joint_state_define_func_file}
@@ -300,6 +302,146 @@ impl RobotCollisionSpecFileParser {
 
         Self{robot_link_radius, cuboids, spheres}
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct EnvCollisionFileParser {
+    pub robot_link_radius: f64,
+    pub cuboids: Vec<CuboidEnv>,
+    pub spheres: Vec<SphereEnv>,
+    pub pcds:Vec<PCEnv>
+}
+impl EnvCollisionFileParser {
+    pub fn from_yaml_path(fp: String) -> Self {
+        let fp2 = fp.clone();
+        let docs = get_yaml_obj(fp);
+        let doc = &docs[0];
+
+        let cuboids_option = doc["obstacles"]["cuboids"].as_vec();
+        let spheres_option = doc["obstacles"]["spheres"].as_vec();
+        let point_cloud_option = doc["obstacles"]["point_cloud"].as_vec();
+
+        let robot_link_radius = doc["loaded_robot"]["link_radius"].as_f64().unwrap();
+
+        let mut cuboids: Vec<CuboidEnv> = Vec::new();
+        let mut spheres: Vec<SphereEnv> = Vec::new();
+        let mut pcds: Vec<PCEnv> = Vec::new();
+
+        if cuboids_option.is_some() {
+            let cuboids_list = cuboids_option.unwrap();
+            let l = cuboids_list.len();
+            for i in 0..l {
+                let name = cuboids_list[i]["name"].as_str().unwrap().to_string();
+                let scale = cuboids_list[i]["scale"].as_vec().unwrap();
+                let sx_half = scale[0].as_f64().unwrap();
+                let sy_half = scale[1].as_f64().unwrap();
+                let sz_half = scale[2].as_f64().unwrap();
+
+                let rots = cuboids_list[i]["rotation"].as_vec().unwrap();
+                let rx = rots[0].as_f64().unwrap();
+                let ry = rots[1].as_f64().unwrap();
+                let rz = rots[2].as_f64().unwrap();
+
+                let ts = cuboids_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let animation = cuboids_list[i]["animation"].as_str().unwrap();
+                let is_dynamic = animation != "static";
+
+                cuboids.push(CuboidEnv::new(name, sx_half, sy_half, sz_half, rx, ry, rz, tx, ty, tz, is_dynamic));
+            }
+        }
+
+        if spheres_option.is_some() {
+            let spheres_list = spheres_option.unwrap();
+            let l = spheres_list.len();
+            for i in 0..l {
+                let name = spheres_list[i]["name"].as_str().unwrap().to_string();
+                let radius = spheres_list[i]["scale"].as_f64().unwrap();
+
+                let ts = spheres_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let animation = spheres_list[i]["animation"].as_str().unwrap();
+                let is_dynamic = animation != "static";
+
+                spheres.push(SphereEnv::new(name, radius, tx, ty, tz, is_dynamic));
+            }
+        }
+
+        if point_cloud_option.is_some() {
+            let point_cloud_list = point_cloud_option.unwrap();
+            let l = point_cloud_list.len();
+
+            for i in 0..l {
+                let name = point_cloud_list[i]["name"].as_str().unwrap().to_string();
+                let animation = point_cloud_list[i]["animation"].as_str().unwrap();
+                let is_dynamic = animation != "static";
+
+                let scale = point_cloud_list[i]["scale"].as_vec().unwrap();
+                let sx = scale[0].as_f64().unwrap();
+                let sy = scale[1].as_f64().unwrap();
+                let sz = scale[2].as_f64().unwrap();
+
+                let ts = point_cloud_list[i]["translation"].as_vec().unwrap();
+                let tx = ts[0].as_f64().unwrap();
+                let ty = ts[1].as_f64().unwrap();
+                let tz = ts[2].as_f64().unwrap();
+
+                let rots = point_cloud_list[i]["rotation"].as_vec().unwrap();
+                let rx = rots[0].as_f64().unwrap();
+                let ry = rots[1].as_f64().unwrap();
+                let rz = rots[2].as_f64().unwrap();
+
+                let mut points: Vec<SphereEnv> = Vec::new();
+                let path_to_src_str = get_path_to_src();
+                let path_to_src = Path::new(&path_to_src_str);
+                let point_cloud_file_name = point_cloud_list[i]["file"].as_str().unwrap();
+                let point_cloud_path = path_to_src.join(Path::new("geometry_files")).join(Path::new(point_cloud_file_name));
+                let point_cloud_file = File::open(point_cloud_path).unwrap();
+                let lines: Vec<Result<String, io::Error>> = io::BufReader::new(point_cloud_file).lines().collect();
+                for line in lines {
+                    if let Ok(l) = line {
+                        let mut spliter = ",";
+                        if !l.contains(spliter) {
+                            spliter = " ";
+                        }
+                        let data: Vec<&str> = l.split(spliter).collect();
+                        if data.len() >= 3 && data[0].parse::<f64>().is_ok() && data[1].parse::<f64>().is_ok() && data[2].parse::<f64>().is_ok() {
+                            let x = data[0].parse::<f64>().unwrap();
+                            let y = data[1].parse::<f64>().unwrap();
+                            let z = data[2].parse::<f64>().unwrap();
+                            // println!("Point: ({}, {}, {})", x, y, z);
+                            points.push(SphereEnv::new(name.clone(), 0.001, sx * x, sy * y, sz * z, false));
+                        }
+                    }
+                }
+                pcds.push(PCEnv::new(name, rx, ry, rz, tx, ty, tz, is_dynamic, points))
+            }
+        }
+
+        Self{robot_link_radius, cuboids, spheres, pcds}
+    }
+}
+
+pub fn get_objective_mode(fp: String) -> String {
+    let yaml_files = get_yaml_obj(fp);
+    let yaml_file = &yaml_files[0];
+
+    let objective_mode = yaml_file["loaded_robot"]["objective_mode"].as_str().unwrap().to_string();
+    objective_mode
+}
+
+pub fn get_info_file_name(fp: String) -> String {
+    let yaml_files = get_yaml_obj(fp);
+    let yaml_file = &yaml_files[0];
+
+    let info_file_name = yaml_file["loaded_robot"]["name"].as_str().unwrap().to_string();
+    info_file_name
 }
 
 

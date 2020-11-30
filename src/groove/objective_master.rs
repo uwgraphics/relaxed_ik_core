@@ -2,7 +2,7 @@ use crate::groove::objective::*;
 use crate::groove::vars::RelaxedIKVars;
 
 pub struct ObjectiveMaster {
-    pub objectives: Vec<Box<dyn ObjectiveTrait>>,
+    pub objectives: Vec<Box<dyn ObjectiveTrait + Send>>,
     pub num_chains: usize,
     pub weight_priors: Vec<f64>,
     pub lite: bool,
@@ -11,7 +11,7 @@ pub struct ObjectiveMaster {
 
 impl ObjectiveMaster {
     pub fn standard_ik(num_chains: usize) -> Self {
-        let mut objectives: Vec<Box<dyn ObjectiveTrait>> = Vec::new();
+        let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
@@ -22,14 +22,47 @@ impl ObjectiveMaster {
         Self{objectives, num_chains, weight_priors, lite: true, finite_diff_grad: true}
     }
 
-    pub fn relaxed_ik(num_chains: usize) -> Self {
-        let mut objectives: Vec<Box<dyn ObjectiveTrait>> = Vec::new();
+    pub fn tune_weight_priors(&mut self, vars: &RelaxedIKVars) {
+        let a = 0.05;
+        let cap = 0.001;
+        for i in 0..self.num_chains {
+            let mut score_max = 0.0;
+            for (option, score) in &vars.env_collision.active_obstacles[i] {
+                if *score > score_max {
+                    score_max = *score;
+                }
+            }
+            // match ee quat goal objectives
+            let weight_cur = self.weight_priors[3*i+1];
+            let weight_delta = a / (a + score_max) - weight_cur;
+            if weight_delta.abs() < cap {
+                self.weight_priors[3*i+1] += weight_delta;
+            } else {
+                self.weight_priors[3*i+1] += cap * weight_delta / weight_delta.abs();
+            }
+        }
+    }
+
+    pub fn relaxed_ik(num_chains: usize, objective_mode: String) -> Self {
+        let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosGoals::new(i)));
-            weight_priors.push(10.0);
+            weight_priors.push(1.0);
             objectives.push(Box::new(MatchEEQuatGoals::new(i)));
-            weight_priors.push(9.0);
+            if objective_mode == "ECA3" {
+                weight_priors.push(0.0);
+            } else if objective_mode == "ECAA" {
+                weight_priors.push(1.0);
+            } else {
+                weight_priors.push(1.0);
+            }
+            objectives.push(Box::new(EnvCollision::new(i)));
+            if objective_mode == "noECA" {
+                weight_priors.push(0.0);
+            } else {
+                weight_priors.push(1.0);
+            }
         }
         objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(7.0);
         objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(2.0);
@@ -37,7 +70,7 @@ impl ObjectiveMaster {
         objectives.push(Box::new(JointLimits));    weight_priors.push(1.0);
         objectives.push(Box::new(NNSelfCollision));    weight_priors.push(1.0);
 
-        Self{objectives, num_chains, weight_priors, lite: true, finite_diff_grad: true} // fix this
+        Self{objectives, num_chains, weight_priors, lite: false, finite_diff_grad: true} // fix this
     }
 
     pub fn call(&self, x: &[f64], vars: &RelaxedIKVars) -> f64 {
