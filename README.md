@@ -11,13 +11,13 @@ RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such
 
 The Rust version of [RelaxedIK (Deprecated)](https://github.com/uwgraphics/relaxed_ik/tree/dev) consists of three parts: a Rust library of RelaxedIK, a ROS1 wrapper around it, and a preprocessing toolkit to generate robot config files needed for RelaxedIK. To make it more convenient to iterate and build other wrappers around it, we extracted the Rust library from it and refractored the library into this repo. This repo contains a Rust implemntation of RelaxedIK in the form of both a library crate and a binary crate. The library crate simply includes the Rust code base of RelaxedIK, and the binary crate is desgined to be executed as a binary which takes a Cartesian-space goal as input and returns a robot joint configuration. Although this repo is runnable when compiled as a binary crate, it is not designed to run independently. In most cases, one of the RelaxedIK wrappers that connects RelaxedIK Core to various interfaces should be more useful.
 
-The preprocessing toolkit in the origianl version of RelaxedIK was excluded from this repo to keep the modularity. Instead, we provide all of the pre-generated config files for some mostly used robot manipulators, including a Universal Robots UR5 (6-DOF), a Rethink Robotics Sawyer (7-DOF), a Kinova Jaco (7-DOF), a Kuka IIWA (7-DOF), a Franka Panda (7-DOF), an ABB Yumi (14-DOF), a Rethink Robotics Baxter (14-DOF), and the Rainbow Robotics Hubo+ (15-DOF). If your robot is not included in this list, please follow the instructions given below in the "Getting Started" section.
+The preprocessing toolkit in the origianl version of RelaxedIK was excluded from this repo to keep the modularity. Instead, we provide all of the pre-generated config files for some mostly used robot manipulators, including a Universal Robots UR5 (6-DOF), a Rethink Robotics Sawyer (7-DOF), a Kinova Jaco (7-DOF), a Kuka IIWA (7-DOF), a Franka Panda (7-DOF), an ABB Yumi (14-DOF), a Rethink Robotics Baxter (14-DOF), and the Rainbow Robotics Hubo+ (15-DOF). If your robot is not included in this list, please follow the specific instructions in the "Getting Started" section.
 
 If anything with the solver is not working as expected, or if you have any feedback, feel free to let us know! (email: rakita@cs.wisc.edu, website: http://pages.cs.wisc.edu/~rakita) We are actively supporting and extending this code, so we are interested to hear about how the solver is being used and any positive or negative experiences in using it.
 
 ## Citation
 
-If you use our solver, please cite our RSS paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
+If you use RelaxedIK, please cite our RSS paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
 ```
 @INPROCEEDINGS{Rakita-RSS-18, 
     AUTHOR    = {Daniel Rakita AND Bilge Mutlu AND Michael Gleicher}, 
@@ -30,7 +30,7 @@ If you use our solver, please cite our RSS paper: [*RelaxedIK: Real-time Synthes
 }
 ```
 
-If you use CollisionIK embedded in this repo (RelaxedIK with environment collision avoidance), please cite our ICRA paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
+If you use CollisionIK (RelaxedIK with environment collision avoidance), please cite our ICRA paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
 ```
 CITATION PLACEHOLDER
 ```
@@ -90,7 +90,7 @@ More information about RelaxedIK, Collision IK, and all the wrappers could be fo
     - 1 info file <sawyer_info.yaml> in the *info_files* folder
     - 1 joint state function file <sawyer_joint_state_define> in the *joint_state_define_functions* folder
     - 1 urdf file <sawyer.urdf> in the *urdfs* folder.
-1. Look at <settings.yaml> in the *config* folder and follow the information there to customize the parameters. Note that you don't need to recompile *relaxed_ik_core* every time you change the parameters in <settings.yaml>.
+1. Select the robot you want to work with by typing the corresponding info file name of the robot (e.g. "sawyer_info.yaml") into <config/loaded_robot>. Note that you don't need to recompile *relaxed_ik_core* every time you change the robot name.
 1. Compile this repo:
     ```bash
     cargo build
