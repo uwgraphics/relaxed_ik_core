@@ -124,55 +124,42 @@ body {
             <h2 class="section-heading">Wrappers</h2>
             
 
-<p>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 5 wrappers that we implemented for ROS, ROS2, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the README in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</p>
+<p>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 4 wrappers that we implemented for ROS, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the READMEs in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</p>
 
-<h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
+<p>The links to these github repos are here:</p>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</li>
-<li>This is a lighter-weight version of RelaxedIK wrapped up in ROS1. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. You can treat this wrapper as a new iteration over <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_ros1">RelaxedIK ROS1</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_unity">RelaxedIK Unity</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">RelaxedIK CoppeliaSim</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_mujoco">RelaxedIK Mujoco</a></li>
 </ul>
 
-<h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
+<h3 id="relaxedik-ros1-https-github-com-uwgraphics-relaxed-ik-ros1"><a href="https://github.com/uwgraphics/relaxed_ik_ros1">RelaxedIK ROS1</a></h3>
 
 <ul>
-<li>This is RelaxedIK wrapped up in ROS2.</li>
+<li>This wrapper has the complete set of features available in the RelaxedIK package and it is also where CollisionIK resides. If you doesn’t have strong preferences over any specific wrapper, you probably should consider this ROS wrapper as the first choice. A keyboard pose goal driver and an rviz viewer are provided for testing purpose.</li>
 </ul>
 
-<h3 id="relaxed-ik-coppeliasim">Relaxed IK CoppeliaSim</h3>
+<h3 id="relaxedik-coppeliasim-https-github-com-uwgraphics-relaxed-ik-coppeliasim"><a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">RelaxedIK CoppeliaSim</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">relaxed_ik_coppeliasim</a>.</li>
-<li>This is a RelaxedIK plugin for CoppeliaSim. Although it&rsquo;s possible to use RelaxedIK in CoppeliaSim via ROS and the ROS wrapper of RelaxedIK at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That&rsquo;s why we developed this wrapper.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li>This wrapper is a RelaxedIK plugin for CoppeliaSim. Although it’s possible to access the ROS1 wrapper of RelaxedIK in CoppeliaSim through ROS topics and params, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That’s where the inspiration of this wrapper comes from. If you don&rsquo;t need ROS in your project, this wrapper is designed for you; however, if you need ROS for other parts of your project, it is still recommended to use the ROS wrapper since that one has the complete set of features available.</li>
 </ul>
 
-<h3 id="relaxed-ik-mujoco">Relaxed IK Mujoco</h3>
+<h3 id="relaxedik-mujoco-https-github-com-uwgraphics-relaxed-ik-mujoco"><a href="https://github.com/uwgraphics/relaxed_ik_mujoco">RelaxedIK Mujoco</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_mujoco">relaxed_ik_mujoco</a>.</li>
-<li>This is a RelaxedIK wrapper for Mujoco.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li>This wrapper is a RelaxedIK Plugin for MuJoCo. MuJoCo is an advanced physics simulation engine that may have some extra features unavailable in CoppeliaSim.</li>
 </ul>
 
-<h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
+<h3 id="relaxedik-unity-https-github-com-uwgraphics-relaxed-ik-unity"><a href="https://github.com/uwgraphics/relaxed_ik_unity">RelaxedIK Unity</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</li>
-<li>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:</li>
-</ul>
+<li><p>This wrapper allows users to use RelaxedIK in Unity. This is designed to work on Windows and it probably won’t work on a Linux machine. A few commonly used simulated robot arms have already been set up for you to play with. In the simulation, you will be able to disable or enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to adjust and visualize the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with RelaxedIK by dragging the transform gizmo associated with the gripper of the robot.</p>
 
-<p><img src="images/unity1.png" alt="Unity screenshot1" width="100%"/></p>
-
-<p style="text-align:center; padding-bottom:10px">(1) Unity RelaxedIK disabled</p>
-
-<p><img src="images/unity2.png" alt="Unity screenshot2" width="100%"/></p>
-
-<p style="text-align:center; padding-bottom:10px">(2) Unity RelaxedIK enabled</p>
-
-<ul>
-<li>Please refer to the README in the repo for more infomation.</li>
+<p><img src="images/unity2.png" alt="Unity screenshot" width="100%"/>
+<p style="text-align:center; padding-bottom:10px">RelaxedIK Unity</p></p></li>
 </ul>
 
         </div>

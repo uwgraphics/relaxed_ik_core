@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="generator" content="Hugo 0.73.0" />
+	<meta name="generator" content="Hugo 0.82.1" />
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -244,16 +244,17 @@ body {
                 <div>
                     
                     <h2 class="section-heading">About</h2>
-                    <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <i> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion </i> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
+                    <p>Welcome to RelaxedIK! We implement the methods discussed in our paper <a href="http://www.roboticsproceedings.org/rss14/p43.html"><em>RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion</em></a> and <a href="https://arxiv.org/abs/2102.13187"><em>CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance</em></a>.</p>
 
 <ul>
-<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00):
-<a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
-<li>Video explaining RelaxedIK:
-<a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
+<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): <a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
+<li>Video explaining RelaxedIK: <a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
+<li>Video explaining CollisionIK: [Working on it&hellip;]</li>
 </ul>
 
 <p>RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &ldquo;move the robot&rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&rdquo;) to Joint-Space (i.e., the robot&rsquo;s rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.</p>
+
+<p>CollisionIK is a per-instant pose optimization method that can generate configurations that achieve specified pose or motion objectives as best as possible over a sequence of solutions, while also simultaneously avoiding collisions with static or dynamic obstacles in the environment. CollisionIK extends RelaxedIK by incorporating environment collision avoidance into the optimization structure.</p>
 
                 </div>
             </div>
@@ -273,9 +274,9 @@ body {
                 <div>
                     
                     <h2 class="section-heading">Core</h2>
-                    <p>The core part of RelaxedIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">relaxed_ik_core</a>. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the wrappers section for more information on how to run RelaxedIK.</p>
+                    <p>The core part of RelaxedIK and CollisionIK is at <a href="https://github.com/uwgraphics/relaxed_ik_core">RelaxedIK Core</a>. The core contains a Rust implementation of RelaxedIK and CollisionIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the Wrappers section and READMEs in those wrapper repos for more information on how to run RelaxedIK or CollisionIK.</p>
 
-<p>To introduce relaxed_ik_core, let&rsquo;s first talk about the previous iteration of RelaxedIK at <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>. There are three parts in this repo: the Rust library of RelaxedIK, a ROS wrapper around it, and a preprocessing toolkit for robot config files needed for RelaxedIK. To make it more convenient to improve RelaxedIK and build all kinds of wrappers around it, we extract the Rust library from that repo to be relaxed_ik_core. Also, to ease the process of setting up a robot arm with RelaxedIK, we decide to exclude the preprocessing toolkit (which is accessible in <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>) from relaxed_ik_core and instead provide all of the pre-generated config files for some mostly used robot manipulators. The list of available robots include baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, and yumi. Generally, this version <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a> is only recommended if you would like to work on the configuration process yourself or set up a robot that we didn&rsquo;t include in the available options. In that version, you will have the opportunity to (and will have to) set up everything from scratch, including importing a urdf, configuring the collision files, and training the neural network, etc. If you&rsquo;re working on a robot for which we provided config files, relaxed_ik_core and its wrappers are likely to make your life much easier since setting the name of the robot you would like to run in <code>relaxed_ik_core/config/loaded_robot</code> will almost be everything you need to do to work with relaxe_ik_core. You will still have the flexibility to change the initial joint configuration in the corresponding info file in <code>relaxed_ik_core/config/info_files</code>.</p>
+<p>To introduce relaxed_ik_core, let&rsquo;s first talk about the previous iteration of RelaxedIK at <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>. There are three parts in this repo: the Rust library of RelaxedIK, a ROS wrapper around it, and a preprocessing toolkit for robot config files needed for RelaxedIK. To make it more convenient to extend RelaxedIK and build all kinds of wrappers around it, we extract the Rust library from that repo to be relaxed_ik_core. Also, to ease the process of setting up a robot arm with RelaxedIK, we decide to exclude the preprocessing toolkit (which is accessible in <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>) from relaxed_ik_core and instead provide all of the pre-generated config files for some mostly used robot manipulators. The list of available robots include baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, and yumi. Please refer to the READMEs in those repos if you intend to work with a robot not in this list.</p>
 
                 </div>
             </div>
@@ -297,55 +298,42 @@ body {
                     <h2 class="section-heading">Wrappers</h2>
                     
 
-<p>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 5 wrappers that we implemented for ROS, ROS2, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the README in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</p>
+<p>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 4 wrappers that we implemented for ROS, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the READMEs in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</p>
 
-<h3 id="relaxed-ik-ros">Relaxed IK ROS</h3>
+<p>The links to these github repos are here:</p>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>.</li>
-<li>This is a lighter-weight version of RelaxedIK wrapped up in ROS1. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. You can treat this wrapper as a new iteration over <a href="https://github.com/uwgraphics/relaxed_ik/tree/dev">relaxed_ik</a>.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_ros1">RelaxedIK ROS1</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_unity">RelaxedIK Unity</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">RelaxedIK CoppeliaSim</a></li>
+<li><a href="https://github.com/uwgraphics/relaxed_ik_mujoco">RelaxedIK Mujoco</a></li>
 </ul>
 
-<h3 id="relaxed-ik-ros2-under-developed">Relaxed IK ROS2 (Under developed)</h3>
+<h3 id="relaxedik-ros1-https-github-com-uwgraphics-relaxed-ik-ros1"><a href="https://github.com/uwgraphics/relaxed_ik_ros1">RelaxedIK ROS1</a></h3>
 
 <ul>
-<li>This is RelaxedIK wrapped up in ROS2.</li>
+<li>This wrapper has the complete set of features available in the RelaxedIK package and it is also where CollisionIK resides. If you doesn’t have strong preferences over any specific wrapper, you probably should consider this ROS wrapper as the first choice. A keyboard pose goal driver and an rviz viewer are provided for testing purpose.</li>
 </ul>
 
-<h3 id="relaxed-ik-coppeliasim">Relaxed IK CoppeliaSim</h3>
+<h3 id="relaxedik-coppeliasim-https-github-com-uwgraphics-relaxed-ik-coppeliasim"><a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">RelaxedIK CoppeliaSim</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_coppeliasim">relaxed_ik_coppeliasim</a>.</li>
-<li>This is a RelaxedIK plugin for CoppeliaSim. Although it&rsquo;s possible to use RelaxedIK in CoppeliaSim via ROS and the ROS wrapper of RelaxedIK at <a href="https://github.com/uwgraphics/relaxed_ik_ros1">relaxed_ik_ros1</a>, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That&rsquo;s why we developed this wrapper.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li>This wrapper is a RelaxedIK plugin for CoppeliaSim. Although it’s possible to access the ROS1 wrapper of RelaxedIK in CoppeliaSim through ROS topics and params, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That’s where the inspiration of this wrapper comes from. If you don&rsquo;t need ROS in your project, this wrapper is designed for you; however, if you need ROS for other parts of your project, it is still recommended to use the ROS wrapper since that one has the complete set of features available.</li>
 </ul>
 
-<h3 id="relaxed-ik-mujoco">Relaxed IK Mujoco</h3>
+<h3 id="relaxedik-mujoco-https-github-com-uwgraphics-relaxed-ik-mujoco"><a href="https://github.com/uwgraphics/relaxed_ik_mujoco">RelaxedIK Mujoco</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_mujoco">relaxed_ik_mujoco</a>.</li>
-<li>This is a RelaxedIK wrapper for Mujoco.</li>
-<li>Please refer to the README in the repo for more infomation.</li>
+<li>This wrapper is a RelaxedIK Plugin for MuJoCo. MuJoCo is an advanced physics simulation engine that may have some extra features unavailable in CoppeliaSim.</li>
 </ul>
 
-<h3 id="relaxed-ik-unity">Relaxed IK Unity</h3>
+<h3 id="relaxedik-unity-https-github-com-uwgraphics-relaxed-ik-unity"><a href="https://github.com/uwgraphics/relaxed_ik_unity">RelaxedIK Unity</a></h3>
 
 <ul>
-<li>Available at <a href="https://github.com/uwgraphics/relaxed_ik_unity">relaxed_ik_unity</a>.</li>
-<li>This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won&rsquo;t work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:</li>
-</ul>
+<li><p>This wrapper allows users to use RelaxedIK in Unity. This is designed to work on Windows and it probably won’t work on a Linux machine. A few commonly used simulated robot arms have already been set up for you to play with. In the simulation, you will be able to disable or enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to adjust and visualize the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with RelaxedIK by dragging the transform gizmo associated with the gripper of the robot.</p>
 
-<p><img src="images/unity1.png" alt="Unity screenshot1" width="100%"/></p>
-
-<p style="text-align:center; padding-bottom:10px">(1) Unity RelaxedIK disabled</p>
-
-<p><img src="images/unity2.png" alt="Unity screenshot2" width="100%"/></p>
-
-<p style="text-align:center; padding-bottom:10px">(2) Unity RelaxedIK enabled</p>
-
-<ul>
-<li>Please refer to the README in the repo for more infomation.</li>
+<p><img src="images/unity2.png" alt="Unity screenshot" width="100%"/>
+<p style="text-align:center; padding-bottom:10px">RelaxedIK Unity</p></p></li>
 </ul>
 
                 </div>
@@ -358,28 +346,6 @@ body {
 
 	
     <div class="content-section-b">
-    
-   
-        <div class="container">
-
-            <div class="row">
-                <div>
-                    
-                    <h2 class="section-heading">FAQs</h2>
-                    <p>Q:</p>
-
-<p>A:</p>
-
-                </div>
-            </div>
-
-        </div>
-        
-
-    </div>
-
-	 
-    <div class="content-section-a">
     
    
         <div class="container">

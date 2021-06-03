@@ -1,23 +1,22 @@
-# RelaxedIK Core
+# CollisionIK Core
 
 ## Introduction
 
-Welcome to RelaxedIK! This solver implements the methods discussed in our paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
+Welcome to CollisionIK! This solver implements the methods discussed in our paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
 
-- Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): https://youtu.be/bih5e9MHc88?t=737
-- Video explaining RelaxedIK: https://youtu.be/AhsQFJzB8WQ
+- Video explaining CollisionIK: [Working on it...]
 
-RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as “move the robot’s right arm end-effector to position X, while maintaining an end-effector orientation Y”) to joint space (i.e., the robot’s rotation values for each joint degree-of-freedom at a particular time-point) is done both accurately and feasibly. RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.
+CollisionIK is a per-instant pose optimization method that can generate configurations that achieve specified pose or motion objectives as best as possible over a sequence of solutions, while also simultaneously avoiding collisions with static or dynamic obstacles in the environment. CollisionIK builds on our prior work on [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html), and that's why we put it as one branch of this RelaxedIK Core repo.
 
-The Rust version of [RelaxedIK (Deprecated)](https://github.com/uwgraphics/relaxed_ik/tree/dev) consists of three parts: a Rust library of RelaxedIK, a ROS1 wrapper around it, and a preprocessing toolkit to generate robot config files needed for RelaxedIK. To make it more convenient to iterate and build other wrappers around it, we extracted the Rust library from it and refractored the library into this repo. This repo contains a Rust implemntation of RelaxedIK in the form of both a library crate and a binary crate. The library crate simply includes the Rust code base of RelaxedIK, and the binary crate is desgined to be executed as a binary which takes a Cartesian-space goal as input and returns a robot joint configuration. Although this repo is runnable when compiled as a binary crate, it is not designed to run independently. In most cases, one of the RelaxedIK wrappers that connects RelaxedIK Core to various interfaces should be more useful.
+This repo contains a Rust implemntation of CollisionIK in the form of both a library crate and a binary crate. The library crate simply includes the Rust code base of CollisionIK, and the binary crate is desgined to be executed as a binary which takes a Cartesian-space goal as input and returns a robot joint configuration. Although this repo is runnable when compiled as a binary crate, it is not designed to run independently. In most cases, you would like to use [this Collision IK ROS wrapper](https://github.com/uwgraphics/relaxed_ik_ros1) that connects the Rust library to ROS.
 
-The preprocessing toolkit in the origianl version of RelaxedIK was excluded from this repo to keep the modularity. Instead, we provide all of the pre-generated config files for some mostly used robot manipulators, including a Universal Robots UR5 (6-DOF), a Rethink Robotics Sawyer (7-DOF), a Kinova Jaco (7-DOF), a Kuka IIWA (7-DOF), a Franka Panda (7-DOF), an ABB Yumi (14-DOF), a Rethink Robotics Baxter (14-DOF), and the Rainbow Robotics Hubo+ (15-DOF). If your robot is not included in this list, please follow the instructions given below in the "Getting Started" section.
+We provide all of the pre-generated config files for some mostly used robot manipulators, including a Universal Robots UR5 (6-DOF), a Rethink Robotics Sawyer (7-DOF), a Kinova Jaco (7-DOF), a Kuka IIWA (7-DOF), a Franka Panda (7-DOF), an ABB Yumi (14-DOF), a Rethink Robotics Baxter (14-DOF), and the Rainbow Robotics Hubo+ (15-DOF). If your robot is not included in this list, please follow the specifc instructions in the "Getting Started" section.
 
 If anything with the solver is not working as expected, or if you have any feedback, feel free to let us know! (email: rakita@cs.wisc.edu, website: http://pages.cs.wisc.edu/~rakita) We are actively supporting and extending this code, so we are interested to hear about how the solver is being used and any positive or negative experiences in using it.
 
 ## Citation
 
-If you use our solver, please cite our RSS paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
+If you use RelaxedIK, please cite our RSS paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
 ```
 @INPROCEEDINGS{Rakita-RSS-18, 
     AUTHOR    = {Daniel Rakita AND Bilge Mutlu AND Michael Gleicher}, 
@@ -30,7 +29,7 @@ If you use our solver, please cite our RSS paper: [*RelaxedIK: Real-time Synthes
 }
 ```
 
-If you use CollisionIK embedded in this repo (RelaxedIK with environment collision avoidance), please cite our ICRA paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
+If you use CollisionIK (RelaxedIK with environment collision avoidance), please cite our ICRA paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
 ```
 CITATION PLACEHOLDER
 ```
@@ -83,20 +82,20 @@ More information about RelaxedIK, Collision IK, and all the wrappers could be fo
 ### Getting Started
 
 1. Make sure that you have installed all the dependencies.
-1. If you intend to investigate or run this repo independently, simply clone this repo into your destination folder. If you are going to use one of the wrappers of RelaxedIK, take a look at the README in their corresponding repo before proceeding. 
-1. If your robot is in this list: [baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, yumi], ignore this step. Else, you will need to clone [this repo](https://github.com/uwgraphics/relaxed_ik) and follow the step-by-step guide [there](https://github.com/uwgraphics/relaxed_ik/blob/dev/src/start_here.py) to get the required robot config files into corresponding folders in the *config* folder. To specify, there should be (replace "sawyer" with your robot name or your urdf name in some cases):
+2. If you intend to investigate or run this repo independently, simply clone this repo into your destination folder. If you are going to use one of the wrappers, take a look at the README in their corresponding repo before proceeding. 
+3. If your robot is in this list: [baxter, hubo, iiwa7, jaco7, panda, sawyer, ur5, yumi], ignore this step. Else, you will need to clone [this repo](https://github.com/uwgraphics/relaxed_ik) and follow the step-by-step guide [there](https://github.com/uwgraphics/relaxed_ik/blob/dev/src/start_here.py) to get the required robot config files into corresponding folders in the *config* folder. To specify, there should be (replace "sawyer" with your robot name or your urdf name in some cases):
     - 1 self-collision file <collision_sawyer.yaml> in the *collision_files* folder
     - 4 Rust neural network files <sawyer_nn, sawyer_nn.yaml, sawyer_nn_jointpoint, sawyer_nn_jointpoint.yaml> in the *collision_nn_rust* folder
     - 1 info file <sawyer_info.yaml> in the *info_files* folder
     - 1 joint state function file <sawyer_joint_state_define> in the *joint_state_define_functions* folder
     - 1 urdf file <sawyer.urdf> in the *urdfs* folder.
-1. Look at <settings.yaml> in the *config* folder and follow the information there to customize the parameters. Note that you don't need to recompile *relaxed_ik_core* every time you change the parameters in <settings.yaml>.
-1. Compile this repo:
+4. Look at <settings.yaml> in the *config* folder and follow the information there to customize the parameters. Note that you don't need to recompile *relaxed_ik_core* every time you change the parameters in <settings.yaml>.
+5. Compile this repo:
     ```bash
     cargo build
     ```
-1. If you don't intend to execute the binary compiled from this repo, ignore this step. Otherwise, type this command and follow the prompts in your console to try it out:
+6. If you don't intend to execute the binary compiled from this repo, ignore this step. Otherwise, type this command and follow the prompts in your console to try it out:
     ```bash
     cargo run --bin relaxed_ik_bin
     ```
-1. Enjoy working with RelaxedIK!
+7. Enjoy working with CollisionIK!

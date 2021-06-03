@@ -6,36 +6,26 @@ author = ""
 sec = 3
 +++
 
-Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 5 wrappers that we implemented for ROS, ROS2, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the README in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well. 
+Although the core is runnable, it is not designed to be run alone. Wrappers are recommended to connect RelaxedIK to different interfaces. Here are 4 wrappers that we implemented for ROS, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the READMEs in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well. 
 
-### Relaxed IK ROS
-+ Available at [relaxed_ik_ros1](https://github.com/uwgraphics/relaxed_ik_ros1).
-+ This is a lighter-weight version of RelaxedIK wrapped up in ROS1. A keyboard pose goal driver and a rviz viewer are included in this wrapper for you to play with. You can treat this wrapper as a new iteration over [relaxed_ik](https://github.com/uwgraphics/relaxed_ik/tree/dev).
-+ Please refer to the README in the repo for more infomation.
+The links to these github repos are here:
 
-### Relaxed IK ROS2 (Under developed)
-+ This is RelaxedIK wrapped up in ROS2.
+- [RelaxedIK ROS1](https://github.com/uwgraphics/relaxed_ik_ros1)
+- [RelaxedIK Unity](https://github.com/uwgraphics/relaxed_ik_unity)
+- [RelaxedIK CoppeliaSim](https://github.com/uwgraphics/relaxed_ik_coppeliasim)
+- [RelaxedIK Mujoco](https://github.com/uwgraphics/relaxed_ik_mujoco)
 
-### Relaxed IK CoppeliaSim
-+ Available at [relaxed_ik_coppeliasim](https://github.com/uwgraphics/relaxed_ik_coppeliasim).
-+ This is a RelaxedIK plugin for CoppeliaSim. Although it's possible to use RelaxedIK in CoppeliaSim via ROS and the ROS wrapper of RelaxedIK at [relaxed_ik_ros1](https://github.com/uwgraphics/relaxed_ik_ros1), it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That's why we developed this wrapper.
-+ Please refer to the README in the repo for more infomation.
+### [RelaxedIK ROS1](https://github.com/uwgraphics/relaxed_ik_ros1)
+- This wrapper has the complete set of features available in the RelaxedIK package and it is also where CollisionIK resides. If you doesn’t have strong preferences over any specific wrapper, you probably should consider this ROS wrapper as the first choice. A keyboard pose goal driver and an rviz viewer are provided for testing purpose.
 
-### Relaxed IK Mujoco
-+ Available at [relaxed_ik_mujoco](https://github.com/uwgraphics/relaxed_ik_mujoco).
-+ This is a RelaxedIK wrapper for Mujoco.
-+ Please refer to the README in the repo for more infomation.
+### [RelaxedIK CoppeliaSim](https://github.com/uwgraphics/relaxed_ik_coppeliasim)
+- This wrapper is a RelaxedIK plugin for CoppeliaSim. Although it’s possible to access the ROS1 wrapper of RelaxedIK in CoppeliaSim through ROS topics and params, it might be more convenient to directly access RelaxedIK in the form of a CoppeliaSim Pluggin. That’s where the inspiration of this wrapper comes from. If you don't need ROS in your project, this wrapper is designed for you; however, if you need ROS for other parts of your project, it is still recommended to use the ROS wrapper since that one has the complete set of features available.
 
-### Relaxed IK Unity
-+ Available at [relaxed_ik_unity](https://github.com/uwgraphics/relaxed_ik_unity).
-+ This is the Unity wrapper of RelaxedIK designed to be run on Windows. Note that it probably won't work on a linux machine. The simulation of a few commonly used robot arms have already been set up for you to play with. You will be able to disable and enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to modify the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with the robot and RelaxedIK by dragging the transform gizmo associated with the gripper of the robot. Here is a screenshot of what it looks like currently:
+### [RelaxedIK Mujoco](https://github.com/uwgraphics/relaxed_ik_mujoco)
+- This wrapper is a RelaxedIK Plugin for MuJoCo. MuJoCo is an advanced physics simulation engine that may have some extra features unavailable in CoppeliaSim.
 
-<img src="images/unity1.png" alt="Unity screenshot1" width="100%"/>
+### [RelaxedIK Unity](https://github.com/uwgraphics/relaxed_ik_unity)
+- This wrapper allows users to use RelaxedIK in Unity. This is designed to work on Windows and it probably won’t work on a Linux machine. A few commonly used simulated robot arms have already been set up for you to play with. In the simulation, you will be able to disable or enable RelaxedIK as you like. When RelaxedIK is disabled, a joint angle writer panel will show up for you to adjust and visualize the joint angle configuration. When RelaxedIK is enabled, you will be able to have real-time interactions with RelaxedIK by dragging the transform gizmo associated with the gripper of the robot.
 
-<p style="text-align:center; padding-bottom:10px">(1) Unity RelaxedIK disabled</p>
-
-<img src="images/unity2.png" alt="Unity screenshot2" width="100%"/>
-
-<p style="text-align:center; padding-bottom:10px">(2) Unity RelaxedIK enabled</p>
-
-+ Please refer to the README in the repo for more infomation.
+    <img src="images/unity2.png" alt="Unity screenshot" width="100%"/>
+    <p style="text-align:center; padding-bottom:10px">RelaxedIK Unity</p>

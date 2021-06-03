@@ -122,16 +122,17 @@ body {
             <hr class="section-heading-spacer">
             <div class="clearfix"></div>
             <h2 class="section-heading">About</h2>
-            <p>Welcome to RelaxedIK! This solver implements the methods discussed in our paper <i> RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion </i> (<a href="http://www.roboticsproceedings.org/rss14/p43.html">http://www.roboticsproceedings.org/rss14/p43.html</a>)</p>
+            <p>Welcome to RelaxedIK! We implement the methods discussed in our paper <a href="http://www.roboticsproceedings.org/rss14/p43.html"><em>RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion</em></a> and <a href="https://arxiv.org/abs/2102.13187"><em>CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance</em></a>.</p>
 
 <ul>
-<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00):
-<a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
-<li>Video explaining RelaxedIK:
-<a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
+<li>Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): <a href="https://youtu.be/bih5e9MHc88?t=737">https://youtu.be/bih5e9MHc88?t=737</a></li>
+<li>Video explaining RelaxedIK: <a href="https://youtu.be/AhsQFJzB8WQ">https://youtu.be/AhsQFJzB8WQ</a></li>
+<li>Video explaining CollisionIK: [Working on it&hellip;]</li>
 </ul>
 
 <p>RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &ldquo;move the robot&rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&rdquo;) to Joint-Space (i.e., the robot&rsquo;s rotation values for each joint degree-of-freedom at a particular time-point) is done both ACCURATELY and FEASIBLY.  By this, we mean that RelaxedIK attempts to find the closest possible solution to the desired end-effector pose goals without exhibiting negative effects such as self-collisions, environment collisions, kinematic-singularities, or joint-space discontinuities.</p>
+
+<p>CollisionIK is a per-instant pose optimization method that can generate configurations that achieve specified pose or motion objectives as best as possible over a sequence of solutions, while also simultaneously avoiding collisions with static or dynamic obstacles in the environment. CollisionIK extends RelaxedIK by incorporating environment collision avoidance into the optimization structure.</p>
 
         </div>
     </div>

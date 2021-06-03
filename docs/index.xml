@@ -6,19 +6,15 @@
     <description>Recent content on Relaxed IK</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 07 Aug 2019 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Wed, 07 Aug 2019 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
       <link>/post/about/</link>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/about/</guid>
-      <description>Welcome to RelaxedIK! This solver implements the methods discussed in our paper  RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion  (http://www.roboticsproceedings.org/rss14/p43.html)
- Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): https://youtu.be/bih5e9MHc88?t=737 Video explaining RelaxedIK: https://youtu.be/AhsQFJzB8WQ  RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &amp;ldquo;move the robot&amp;rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&amp;rdquo;) to Joint-Space (i.</description>
+      <description>Welcome to RelaxedIK! We implement the methods discussed in our paper RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion and CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance.
+ Video of presentation at RSS 2018 (RelaxedIK part starts around 12:00): https://youtu.be/bih5e9MHc88?t=737 Video explaining RelaxedIK: https://youtu.be/AhsQFJzB8WQ Video explaining CollisionIK: [Working on it&amp;hellip;]  RelaxedIK is an inverse kinematics (IK) solver designed for robot platforms such that the conversion between Cartesian end-effector pose goals (such as &amp;ldquo;move the robot&amp;rsquo;s right arm end-effector to position X, while maintaining an end-effector orientation Y&amp;rdquo;) to Joint-Space (i.</description>
     </item>
     
     <item>
@@ -36,17 +32,7 @@
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/core/</guid>
-      <description>The core part of RelaxedIK is at relaxed_ik_core. The core contains a Rust implementation of RelaxedIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the wrappers section for more information on how to run RelaxedIK.</description>
-    </item>
-    
-    <item>
-      <title>FAQs</title>
-      <link>/post/faq/</link>
-      <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
-      
-      <guid>/post/faq/</guid>
-      <description>Q:
-A:</description>
+      <description>The core part of RelaxedIK and CollisionIK is at RelaxedIK Core. The core contains a Rust implementation of RelaxedIK and CollisionIK with both a library crate and a binary crate. The library crate includes all the kinematics libraries of RelaxedIK, while the binary crate is desgined for the purpose of testing. Since the core is not designed to be run independently in general (although it is runnable), please refer to the Wrappers section and READMEs in those wrapper repos for more information on how to run RelaxedIK or CollisionIK.</description>
     </item>
     
     <item>
@@ -55,7 +41,7 @@ A:</description>
       <pubDate>Wed, 07 Aug 2019 00:00:00 +0000</pubDate>
       
       <guid>/post/wrappers/</guid>
-      <description>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 5 wrappers that we implemented for ROS, ROS2, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the README in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</description>
+      <description>Although the core is runnable, it is usually not intended to be run alone. Wrappers are required to connect RelaxedIK to different interfaces. Here are 4 wrappers that we implemented for ROS, CoppeliaSim, Mujoco, and Unity respectively. Each wrapper has detailed instructions on how to work with them in the READMEs in their repo. If you are interested, it is possible to wrap up the core in other interfaces as well.</description>
     </item>
     
   </channel>
