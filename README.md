@@ -32,7 +32,12 @@ If you use RelaxedIK, please cite our RSS paper: [*RelaxedIK: Real-time Synthesi
 
 If you use CollisionIK (RelaxedIK with environment collision avoidance), please cite our ICRA paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
 ```
-CITATION PLACEHOLDER
+@article{rakita2021collisionik,
+  title={CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance},
+  author={Rakita, Daniel and Shi, Haochen and Mutlu, Bilge and Gleicher, Michael},
+  journal={arXiv preprint arXiv:2102.13187},
+  year={2021}
+}
 ```
 
 If you use our solver for a robot teleoperation interface, also consider citing our prior work that shows the effectiveness of RelaxedIK in this setting: [*A Motion Retargeting Method for Effective Mimicry-based Teleoperation of Robot Arms*](https://dl.acm.org/citation.cfm?id=3020254)
