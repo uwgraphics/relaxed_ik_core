@@ -2,9 +2,11 @@
 
 ## Introduction
 
+[documentation](https://uwgraphics.github.io/relaxed_ik_core/)
+
 Welcome to CollisionIK! This solver implements the methods discussed in our paper: [*CollisionIK: A Per-Instant Pose Optimization Method for Generating Robot Motions with Environment Collision Avoidance*](https://arxiv.org/abs/2102.13187)
 
-- Video explaining CollisionIK: [Working on it...]
+- [Video explaining CollisionIK](https://youtu.be/rdMl1gOPNoM)
 
 CollisionIK is a per-instant pose optimization method that can generate configurations that achieve specified pose or motion objectives as best as possible over a sequence of solutions, while also simultaneously avoiding collisions with static or dynamic obstacles in the environment. CollisionIK builds on our prior work on [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html), and that's why we put it as one branch of this RelaxedIK Core repo.
 
