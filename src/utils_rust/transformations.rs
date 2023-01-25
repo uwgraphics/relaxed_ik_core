@@ -32,6 +32,13 @@ pub fn quaternion_dispQ(q: UnitQuaternion<f64>, q_prime: UnitQuaternion<f64>) ->
     q.inverse()*q_prime
 }
 
-pub fn angle_between(q: UnitQuaternion<f64>, q_prime: UnitQuaternion<f64>) -> f64 {
+pub fn angle_between_quaternion(q: UnitQuaternion<f64>, q_prime: UnitQuaternion<f64>) -> f64 {
     quaternion_disp(q, q_prime).norm() * 2.0
 }
+
+pub fn quaternion_from_angleaxis(angle: f64, axis: Vector3<f64>) -> UnitQuaternion<f64> {
+    let a = angle * 2.0;
+    let axis_len = axis.norm();
+    quaternion_exp( axis * (a / axis_len))
+}
+

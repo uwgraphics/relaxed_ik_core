@@ -1,0 +1,8 @@
+urdf: spot_arm.urdf
+link_radius: 0.05 
+base_links:
+  - body
+ee_links:
+  - tool_tip
+starting_config: [ 0.0, -1.81, 2.11, 0.0, 0.78, 0.0 ]
+obstacles:

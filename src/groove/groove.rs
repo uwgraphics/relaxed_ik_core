@@ -1,7 +1,6 @@
 use crate::groove::gradient::{ForwardFiniteDiff, CentralFiniteDiff, GradientFinder, ForwardFiniteDiffImmutable, CentralFiniteDiffImmutable, GradientFinderImmutable};
 use crate::groove::vars::{RelaxedIKVars};
 use optimization_engine::{constraints::*, panoc::*, *};
-use nlopt::*;
 use crate::groove::objective_master::ObjectiveMaster;
 
 pub struct OptimizationEngineOpen {
@@ -29,7 +28,7 @@ impl OptimizationEngineOpen {
         };
 
         // let bounds = NoConstraints::new();
-        let bounds = Rectangle::new(Option::from(v.robot.lower_bounds.as_slice()), Option::from(v.robot.upper_bounds.as_slice()));
+        let bounds = Rectangle::new(Option::from(v.robot.lower_joint_limits.as_slice()), Option::from(v.robot.upper_joint_limits.as_slice()));
 
         /* PROBLEM STATEMENT */
         let problem = Problem::new(&bounds, df, f);
@@ -41,36 +40,5 @@ impl OptimizationEngineOpen {
 
         // println!("Panoc status: {:#?}", status);
         // println!("Panoc solution: {:#?}", x);
-    }
-}
-
-pub struct OptimizationEngineNLopt;
-impl OptimizationEngineNLopt {
-    pub fn new() -> Self { OptimizationEngineNLopt{} }
-
-    pub fn optimize(&mut self, x_out: &mut [f64], v: &RelaxedIKVars, om: &ObjectiveMaster, max_iter: u32) {
-        let num_dim = v.robot.num_dof;
-
-        let obj_f = |x: &[f64], _gradient: Option<&mut [f64]>, _params: &mut ()| -> f64 {
-            let (my_f, my_grad) = om.gradient(x, v);
-            if _gradient.is_none() {
-            } else {
-                let g = _gradient.unwrap();
-                for i in 0..my_grad.len() {
-                    g[i] = my_grad[i];
-                }
-            }
-            my_f
-        };
-
-        let mut opt = Nlopt::new(Algorithm::Slsqp, num_dim, obj_f, Target::Minimize, ());
-        opt.set_ftol_rel(0.000001);
-        opt.set_maxeval(max_iter);
-
-        // let mut x_init = x_out.to_vec();
-        let res = opt.optimize(x_out);
-
-        // println!("X vals: {:?}\n", &x_out[..num_dim]);
-
     }
 }

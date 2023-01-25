@@ -1,164 +1,141 @@
 use crate::spacetime::arm;
-use crate::utils_rust::{geometry_utils, yaml_utils};
+use nalgebra;
 
 #[derive(Clone, Debug)]
 pub struct Robot {
     pub arms: Vec<arm::Arm>,
-    pub joint_names: Vec<Vec<String>>,
-    pub joint_ordering: Vec<String>,
     pub num_chains: usize,
-    pub num_dof: usize,
-    pub subchain_indices: Vec<Vec<usize>>,
-    pub bounds: Vec< [f64; 2] >,
-    pub lower_bounds: Vec<f64>,
-    pub upper_bounds: Vec<f64>,
-    pub velocity_limits: Vec<f64>,
-    __subchain_outputs: Vec<Vec<f64>>
+    pub num_dofs: usize,
+    pub chain_lengths: Vec<usize>,
+    pub lower_joint_limits: Vec<f64>,
+    pub upper_joint_limits: Vec<f64>
 }
 
 impl Robot {
-    pub fn from_info_file_parser(ifp: &yaml_utils::InfoFileParser) -> Robot {
-        let num_chains = ifp.axis_types.len();
-        let num_dof = ifp.velocity_limits.len();
-
+    pub fn from_urdf(urdf_fp: String, base_links: &[String], ee_links: &[String]) -> Self {
+        
+        let chain = k::Chain::<f64>::from_urdf_file(urdf_fp).unwrap();
         let mut arms: Vec<arm::Arm> = Vec::new();
+        let num_chains = base_links.len();
+        let mut chain_lengths = Vec::new();
+        let mut num_dofs = 0;
+
+        let mut lower_joint_limits = Vec::new();
+        let mut upper_joint_limits = Vec::new();
+
         for i in 0..num_chains {
-            let a = arm::Arm::new(ifp.axis_types[i].clone(), ifp.displacements[i].clone(),
-                              ifp.disp_offsets[i].clone(), ifp.rot_offsets[i].clone(), ifp.joint_types[i].clone());
-            arms.push(a);
+            let base_link = chain.find_link(base_links[i].as_str()).unwrap();
+            let ee_link = chain.find_link(ee_links[i].as_str()).unwrap();
+            let serial_chain = k::SerialChain::from_end_to_root(&ee_link, &base_link);
+
+            let mut axis_types: Vec<String> = Vec::new();
+            let mut joint_types: Vec<String> = Vec::new();
+            let disp_offset = nalgebra::Vector3::new(0.0, 0.0, 0.0);
+            let mut displacements = Vec::new();
+            let mut rot_offsets = Vec::new();
+
+            serial_chain.iter().for_each(|node| {
+                let joint = node.joint();
+                match joint.joint_type {
+                    k::JointType::Fixed => {
+                        joint_types.push("fixed".to_string());
+                    },
+                    k::JointType::Rotational { axis } => {
+                        if axis[0] == 1.0 {
+                            axis_types.push("x".to_string());
+                        } else if axis[1] == 1.0 {
+                            axis_types.push("y".to_string());
+                        } else if axis[2] == 1.0 {
+                            axis_types.push("z".to_string());
+                        } else if axis[0] == -1.0 {
+                            axis_types.push("-x".to_string());
+                        } else if axis[1] == -1.0 {
+                            axis_types.push("-y".to_string());
+                        } else if axis[2] == -1.0 {
+                            axis_types.push("-z".to_string());
+                        }
+                        joint_types.push("revolute".to_string());
+                        lower_joint_limits.push(joint.limits.unwrap().min);
+                        upper_joint_limits.push(joint.limits.unwrap().max);
+                    }
+                    k::JointType::Linear { axis } => {
+                        if axis[0] == 1.0 {
+                            axis_types.push("x".to_string());
+                        } else if axis[1] == 1.0 {
+                            axis_types.push("y".to_string());
+                        } else if axis[2] == 1.0 {
+                            axis_types.push("z".to_string());
+                        } else if axis[0] == -1.0 {
+                            axis_types.push("-x".to_string());
+                        } else if axis[1] == -1.0 {
+                            axis_types.push("-y".to_string());
+                        } else if axis[2] == -1.0 {
+                            axis_types.push("-z".to_string());
+                        }
+                        joint_types.push("prismatic".to_string());
+                        lower_joint_limits.push(joint.limits.unwrap().min);
+                        upper_joint_limits.push(joint.limits.unwrap().max);
+                    }
+                }
+
+                displacements.push(joint.origin().translation.vector);
+                rot_offsets.push(joint.origin().rotation);
+            });
+            let arm: arm::Arm = arm::Arm::init(axis_types.clone(), displacements.clone(),
+            rot_offsets.clone(), joint_types.clone());
+            arms.push(arm);
+            chain_lengths.push(axis_types.len() as usize);
+            num_dofs += axis_types.len();
         }
+        // println!("axis types: {:?}", arms[0].axis_types);
+        Robot{arms, num_chains, chain_lengths, num_dofs, lower_joint_limits, upper_joint_limits}
 
-        let subchain_indices = Robot::get_subchain_indices(&ifp.joint_names, &ifp.joint_ordering);
-
-        let mut __subchain_outputs: Vec<Vec<f64>> = Vec::new();
-        for i in 0..subchain_indices.len() {
-            let v: Vec<f64> = Vec::new();
-            __subchain_outputs.push(v);
-            for j in 0..subchain_indices[i].len() {
-                __subchain_outputs[i].push(0.0);
-            }
-        }
-
-        let mut upper_bounds: Vec<f64> = Vec::new();
-        let mut lower_bounds: Vec<f64> = Vec::new();
-        for i in 0..ifp.joint_limits.len() {
-            upper_bounds.push(ifp.joint_limits[i][1].clone());
-            lower_bounds.push(ifp.joint_limits[i][0].clone());
-        }
-
-        Robot{arms, joint_names: ifp.joint_names.clone(), joint_ordering: ifp.joint_ordering.clone(),
-            num_chains, num_dof, subchain_indices, bounds: ifp.joint_limits.clone(), lower_bounds, upper_bounds, velocity_limits: ifp.velocity_limits.clone(), __subchain_outputs}
-    }
-
-    pub fn from_yaml_path(fp: String) -> Robot {
-        let ifp = yaml_utils::InfoFileParser::from_yaml_path(fp);
-        Robot::from_info_file_parser(&ifp)
-    }
-
-    pub fn split_into_subchains(&self, x: &[f64]) -> Vec<Vec<f64>>{
-        let mut out_subchains: Vec<Vec<f64>> = Vec::new();
-        for i in 0..self.num_chains {
-            let s: Vec<f64> = Vec::new();
-            out_subchains.push(s);
-            for j in 0..self.subchain_indices[i].len() {
-                out_subchains[i].push( x[self.subchain_indices[i][j]] );
-            }
-        }
-        out_subchains
-    }
-
-    pub fn split_into_subchains_inplace(&mut self, x: &[f64]) {
-        // let mut out_subchains: Vec<Vec<f64>> = Vec::new();
-        for i in 0..self.num_chains {
-            let s: Vec<f64> = Vec::new();
-            // out_subchains.push(s);
-            for j in 0..self.subchain_indices[i].len() {
-                self.__subchain_outputs[i][j] = x[self.subchain_indices[i][j]];
-            }
-        }
     }
 
     pub fn get_frames(&mut self, x: &[f64]) {
-        self.split_into_subchains_inplace(x);
+        let mut l = 0;
+        let mut r = 0;
         for i in 0..self.num_chains {
-            self.arms[i].get_frames(self.__subchain_outputs[i].as_slice());
+            r += self.chain_lengths[i];
+            self.arms[i].get_frames(&x[l..r]);
+            l = r;
         }
     }
 
     pub fn get_frames_immutable(&self, x: &[f64]) -> Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)> {
         let mut out: Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)> = Vec::new();
-        let subchains = self.split_into_subchains(x);
+        let mut l = 0;
+        let mut r = 0;
         for i in 0..self.num_chains {
-            out.push( self.arms[i].get_frames_immutable( subchains[i].as_slice() ) );
+            r += self.chain_lengths[i];
+            out.push( self.arms[i].get_frames_immutable( &x[l..r] ) );
+            l = r;
+        }
+        out
+    }
+    
+    pub fn get_manipulability_immutable(&self, x: &[f64]) -> f64 {
+        let mut out = 0.0;
+        let mut l = 0;
+        let mut r = 0;
+        for i in 0..self.num_chains {
+            r += self.chain_lengths[i];
+            out += self.arms[i].get_manipulability_immutable( &x[l..r] );
+            l = r;
         }
         out
     }
 
     pub fn get_ee_pos_and_quat_immutable(&self, x: &[f64]) -> Vec<(nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>)> {
         let mut out: Vec<(nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>)> = Vec::new();
-        let subchains = self.split_into_subchains(x);
+        let mut l = 0;
+        let mut r = 0;
         for i in 0..self.num_chains {
-            out.push( self.arms[i].get_ee_pos_and_quat_immutable( subchains[i].as_slice() ) );
+            r += self.chain_lengths[i];
+            out.push( self.arms[i].get_ee_pos_and_quat_immutable( &x[l..r] ));
+            l = r;
         }
         out
     }
-
-    pub fn get_ee_positions(&mut self, x: &[f64]) -> Vec<nalgebra::Vector3<f64>> {
-        let mut out: Vec<nalgebra::Vector3<f64>> = Vec::new();
-        self.split_into_subchains_inplace(x);
-        for i in 0..self.num_chains {
-            out.push(self.arms[i].get_ee_position(self.__subchain_outputs[i].as_slice()));
-        }
-        out
-    }
-
-    pub fn get_ee_rot_mats(&mut self, x: &[f64]) -> Vec<nalgebra::Matrix3<f64>> {
-        let mut out: Vec<nalgebra::Matrix3<f64>> = Vec::new();
-        self.split_into_subchains_inplace(x);
-        for i in 0..self.num_chains {
-            out.push(self.arms[i].get_ee_rot_mat(self.__subchain_outputs[i].as_slice()));
-        }
-        out
-    }
-
-    pub fn get_ee_quats(&mut self, x: &[f64]) -> Vec<nalgebra::UnitQuaternion<f64>> {
-        let mut out: Vec<nalgebra::UnitQuaternion<f64>> = Vec::new();
-        self.split_into_subchains_inplace(x);
-        for i in 0..self.num_chains {
-            out.push(self.arms[i].get_ee_quat(self.__subchain_outputs[i].as_slice()));
-        }
-        out
-    }
-
-    fn get_subchain_indices(joint_names: &Vec<Vec<String>>, joint_ordering: &Vec<String>) -> Vec<Vec<usize>> {
-        let mut out: Vec<Vec<usize>> = Vec::new();
-
-        let num_chains = joint_names.len();
-        for i in 0..num_chains {
-            let v: Vec<usize> = Vec::new();
-            out.push(v);
-        }
-
-        for i in 0..num_chains {
-            for j in 0..joint_names[i].len() {
-                let idx = Robot::get_index_from_joint_order(joint_ordering, &joint_names[i][j]);
-                if  idx == 101010101010 {
-                } else {
-                    out[i].push(idx);
-                }
-            }
-        }
-        out
-    }
-
-    pub fn get_index_from_joint_order(joint_ordering: &Vec<String>, joint_name: &String) -> usize {
-        for i in 0..joint_ordering.len() {
-            if *joint_name == joint_ordering[i] {
-                return i
-            }
-        }
-        101010101010
-    }
-
 }
 

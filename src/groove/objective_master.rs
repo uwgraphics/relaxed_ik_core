@@ -22,55 +22,43 @@ impl ObjectiveMaster {
         Self{objectives, num_chains, weight_priors, lite: true, finite_diff_grad: true}
     }
 
-    pub fn tune_weight_priors(&mut self, vars: &RelaxedIKVars) {
-        let a = 0.05;
-        let cap = 0.001;
-        for i in 0..self.num_chains {
-            let mut score_max = 0.0;
-            for (option, score) in &vars.env_collision.active_obstacles[i] {
-                if *score > score_max {
-                    score_max = *score;
-                }
-            }
-            // match ee quat goal objectives
-            let weight_cur = self.weight_priors[3*i+1];
-            let weight_delta = a / (a + score_max) - weight_cur;
-            if weight_delta.abs() < cap {
-                self.weight_priors[3*i+1] += weight_delta;
-            } else {
-                self.weight_priors[3*i+1] += cap * weight_delta / weight_delta.abs();
-            }
-        }
-    }
 
-    pub fn relaxed_ik(num_chains: usize, objective_mode: String) -> Self {
+    pub fn relaxed_ik(num_chains: usize, num_joints: usize) -> Self {
         let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         for i in 0..num_chains {
-            objectives.push(Box::new(MatchEEPosGoals::new(i)));
+            objectives.push(Box::new(MatchEEPosiDoF::new(i, 0)));
             weight_priors.push(1.0);
-            objectives.push(Box::new(MatchEEQuatGoals::new(i)));
-            if objective_mode == "ECA3" {
-                weight_priors.push(0.0);
-            } else if objective_mode == "ECAA" {
-                weight_priors.push(1.0);
-            } else {
-                weight_priors.push(1.0);
-            }
-            objectives.push(Box::new(EnvCollision::new(i)));
-            if objective_mode == "noECA" {
-                weight_priors.push(0.0);
-            } else {
-                weight_priors.push(1.0);
+            objectives.push(Box::new(MatchEEPosiDoF::new(i, 1)));
+            weight_priors.push(1.0);
+            objectives.push(Box::new(MatchEEPosiDoF::new(i, 2)));
+            weight_priors.push(1.0);
+            objectives.push(Box::new(MatchEERotaDoF::new(i, 0)));
+            weight_priors.push(1.0);
+            objectives.push(Box::new(MatchEERotaDoF::new(i, 1)));
+            weight_priors.push(1.0);
+            objectives.push(Box::new(MatchEERotaDoF::new(i, 2)));
+            weight_priors.push(1.0);
+            // objectives.push(Box::new(EnvCollision::new(i)));
+            // weight_priors.push(1.0);
+        }
+
+        for j in 0..num_joints {
+            objectives.push(Box::new(EachJointLimits::new(j))); weight_priors.push(0.1 );
+        }
+
+        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(0.7);
+        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(0.5);
+        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(0.3);
+        objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(1.0);
+
+        for j in 0..num_joints-2 {
+            for k in j+2..num_joints {
+                objectives.push(Box::new(SelfCollision::new(0, j, k))); weight_priors.push(0.01 );
             }
         }
-        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(7.0);
-        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(2.0);
-        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(1.0);
-        objectives.push(Box::new(JointLimits));    weight_priors.push(1.0);
-        objectives.push(Box::new(NNSelfCollision));    weight_priors.push(1.0);
-
-        Self{objectives, num_chains, weight_priors, lite: false, finite_diff_grad: true} // fix this
+        
+        Self{objectives, num_chains, weight_priors, lite: false, finite_diff_grad: false}
     }
 
     pub fn call(&self, x: &[f64], vars: &RelaxedIKVars) -> f64 {
@@ -131,14 +119,14 @@ impl ObjectiveMaster {
         let mut f_0s: Vec<f64> = Vec::new();
         let frames_0 = vars.robot.get_frames_immutable(x);
         for i in 0..self.objectives.len() {
-            if self.objectives[i].gradient_type() == 1 {
+            if self.objectives[i].gradient_type() == 0 {
                 let (local_obj, local_grad) = self.objectives[i].gradient(x, vars, &frames_0);
                 f_0s.push(local_obj);
                 obj += self.weight_priors[i] * local_obj;
                 for j in 0..local_grad.len() {
                     grad[j] += self.weight_priors[i] * local_grad[j];
                 }
-            } else if self.objectives[i].gradient_type() == 0 {
+            } else if self.objectives[i].gradient_type() == 1 {
                 finite_diff_list.push(i);
                 let local_obj = self.objectives[i].call(x, vars, &frames_0);
                 obj += self.weight_priors[i] * local_obj;
@@ -152,7 +140,7 @@ impl ObjectiveMaster {
                 x_h[i] += 0.0000001;
                 let frames_h = vars.robot.get_frames_immutable(x_h.as_slice());
                 for j in &finite_diff_list {
-                    let f_h = self.objectives[*j].call(x, vars, &frames_h);
+                    let f_h = self.objectives[*j].call(&x_h, vars, &frames_h);
                     grad[i] += self.weight_priors[*j] * ((-f_0s[*j] + f_h) /  0.0000001);
                 }
             }
