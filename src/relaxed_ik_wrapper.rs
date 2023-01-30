@@ -42,7 +42,7 @@ pub unsafe extern "C" fn reset(ptr: *mut RelaxedIK, joint_state: *const c_double
 #[no_mangle]
 pub unsafe extern "C" fn solve_position(ptr: *mut RelaxedIK, pos_goals: *const c_double, pos_length: c_int, 
     quat_goals: *const c_double, quat_length: c_int,
-    tolerance: *const c_double) -> Opt {
+    tolerance: *const c_double, tolerance_length: c_int) -> Opt {
 
     let relaxed_ik = unsafe {
         assert!(!ptr.is_null());
@@ -53,9 +53,19 @@ pub unsafe extern "C" fn solve_position(ptr: *mut RelaxedIK, pos_goals: *const c
     assert!(!quat_goals.is_null(), "Null pointer for quat goals!");
     assert!(!tolerance.is_null(), "Null pointer for tolerance!"); 
 
+    assert!(pos_length as usize == relaxed_ik.vars.robot.num_chains * 3 , 
+        "Pos vels are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 3, pos_length);
+    assert!(quat_length as usize == relaxed_ik.vars.robot.num_chains * 4,
+        "Rot vels are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 4, quat_length);
+    assert!(tolerance_length as usize == relaxed_ik.vars.robot.num_chains * 6, 
+        "Tolerance are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 6, tolerance_length);
+
     let pos_slice: &[c_double] = std::slice::from_raw_parts(pos_goals, pos_length as usize);
     let quat_slice: &[c_double] = std::slice::from_raw_parts(quat_goals, quat_length as usize);
-    let tolerance_slice: &[c_double] = std::slice::from_raw_parts(tolerance, 6);
+    let tolerance_slice: &[c_double] = std::slice::from_raw_parts(tolerance, tolerance_length as usize);
 
     let pos_vec = pos_slice.to_vec();
     let quat_vec = quat_slice.to_vec();
@@ -83,6 +93,16 @@ pub unsafe extern "C" fn solve_velocity(ptr: *mut RelaxedIK, pos_vels: *const c_
     assert!(!pos_vels.is_null(), "Null pointer for pos vels!");
     assert!(!rot_vels.is_null(), "Null pointer for rot vels!");
     assert!(!tolerance.is_null(), "Null pointer for tolerance!"); 
+
+    assert!(pos_length as usize == relaxed_ik.vars.robot.num_chains * 3 , 
+        "Pos vels are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 3, pos_length);
+    assert!(rot_length as usize == relaxed_ik.vars.robot.num_chains * 3,
+        "Rot vels are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 3, rot_length);
+    assert!(tolerance_length as usize == relaxed_ik.vars.robot.num_chains * 6, 
+        "Tolerance are expected to have {} numbers, but got {}", 
+        relaxed_ik.vars.robot.num_chains * 6, tolerance_length);
 
     let pos_slice: &[c_double] = std::slice::from_raw_parts(pos_vels, pos_length as usize);
     let rot_slice: &[c_double] = std::slice::from_raw_parts(rot_vels, rot_length as usize);
@@ -157,8 +177,8 @@ fn solve_position_helper(relaxed_ik: &mut RelaxedIK, pos_goals: Vec<f64>, quat_g
         relaxed_ik.vars.goal_positions[i] = Vector3::new(pos_goals[3*i], pos_goals[3*i+1], pos_goals[3*i+2]);
         let tmp_q = Quaternion::new(quat_goals[4*i+3], quat_goals[4*i], quat_goals[4*i+1], quat_goals[4*i+2]);
         relaxed_ik.vars.goal_quats[i] =  UnitQuaternion::from_quaternion(tmp_q);
-        relaxed_ik.vars.tolerances[i] = Vector6::new( tolerance[3*i], tolerance[3*i+1], tolerance[3*i+2],
-            tolerance[3*i+3], tolerance[3*i+4], tolerance[3*i+5])
+        relaxed_ik.vars.tolerances[i] = Vector6::new( tolerance[6*i], tolerance[6*i+1], tolerance[6*i+2],
+            tolerance[6*i+3], tolerance[6*i+4], tolerance[6*i+5])
     }
                     
     let x = relaxed_ik.solve();

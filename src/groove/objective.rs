@@ -96,7 +96,7 @@ impl ObjectiveTrait for MatchEEPosiDoF {
 
         let T_gc = goal_quat.inverse() * T_gw_T_wc;
  
-        let  dist: f64 = T_gc[self.axis];
+        let dist: f64 = T_gc[self.axis];
 
         let bound =  v.tolerances[self.arm_idx][self.axis];
 

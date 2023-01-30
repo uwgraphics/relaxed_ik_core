@@ -38,9 +38,9 @@ class RelaxedIKRust:
     def solve_position(self, positions, orientations, tolerances):
         '''
         Assuming the robot has N end-effectors
-        positions (3xN array): list of end-effector positions
-        orientations (4xN array): list of end-effector orientations (in quaternion xyzw format)
-        tolerances (6xN array): list of tolerances for each end-effector (x, y, z, rx, ry, rz)
+        positions (1D array with length as 3*N): list of end-effector positions
+        orientations (1D array with length as 4*N): list of end-effector orientations (in quaternion xyzw format)
+        tolerances (1D array with length as 6*N): list of tolerances for each end-effector (x, y, z, rx, ry, rz)
         '''
         pos_arr = (ctypes.c_double * len(positions))()
         quat_arr = (ctypes.c_double * len(orientations))()
@@ -57,9 +57,9 @@ class RelaxedIKRust:
     def solve_velocity(self, linear_velocities, angular_velocities, tolerances):
         '''
         Assuming the robot has N end-effectors
-        linear_velocities (3xN array): list of end-effector linear velocities
-        angular_velocities (3xN array): list of end-effector angular velocities
-        tolerances (6xN array): list of tolerances for each end-effector (x, y, z, rx, ry, rz)
+        linear_velocities (1D array with length as 3*N): list of end-effector linear velocities
+        angular_velocities (1D array with length as 4*N): list of end-effector angular velocities
+        tolerances (1D array with length as 6*N): list of tolerances for each end-effector (x, y, z, rx, ry, rz)
         '''
         linear_arr = (ctypes.c_double * len(linear_velocities))()
         angular_arr = (ctypes.c_double * len(angular_velocities))()
