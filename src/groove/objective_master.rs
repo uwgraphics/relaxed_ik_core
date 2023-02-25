@@ -30,17 +30,17 @@ impl ObjectiveMaster {
         let mut num_dofs = 0;
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 0)));
-            weight_priors.push(1.0);
+            weight_priors.push(50.0);
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 1)));
-            weight_priors.push(1.0);
+            weight_priors.push(50.0);
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 2)));
-            weight_priors.push(1.0);
+            weight_priors.push(50.0);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 0)));
-            weight_priors.push(1.0);
+            weight_priors.push(10.0);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 1)));
-            weight_priors.push(1.0);
+            weight_priors.push(10.0);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 2)));
-            weight_priors.push(1.0);
+            weight_priors.push(10.0);
             // objectives.push(Box::new(EnvCollision::new(i)));
             // weight_priors.push(1.0);
             num_dofs += chain_lengths[i];

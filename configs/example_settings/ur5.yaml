@@ -5,4 +5,5 @@ base_links:
 ee_links:
   - tool0
 starting_config: [3.14, -1.95, -1.2, -3.14, -1.57, -1.57]
+joint_ordering: [ "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint" ]
 obstacles:

@@ -1,5 +1,6 @@
 use crate::spacetime::arm;
 use nalgebra;
+use urdf_rs;
 
 #[derive(Clone, Debug)]
 pub struct Robot {
@@ -12,9 +13,12 @@ pub struct Robot {
 }
 
 impl Robot {
-    pub fn from_urdf(urdf_fp: String, base_links: &[String], ee_links: &[String]) -> Self {
+    pub fn from_urdf(urdf: &str, base_links: &[String], ee_links: &[String]) -> Self {
         
-        let chain = k::Chain::<f64>::from_urdf_file(urdf_fp).unwrap();
+        // let chain = k::Chain::<f64>::from_urdf_file(urdf_fp).unwrap();
+        let description : urdf_rs::Robot = urdf_rs::read_from_string(urdf).unwrap();
+        let chain: k::Chain<f64> = k::Chain::from(description.clone());
+
         let mut arms: Vec<arm::Arm> = Vec::new();
         let num_chains = base_links.len();
         let mut chain_lengths = Vec::new();

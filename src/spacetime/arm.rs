@@ -6,7 +6,6 @@ pub struct Arm {
     pub axis_types: Vec<String>,
     pub displacements: Vec<nalgebra::Vector3<f64>>,
     pub disp_offset: nalgebra::Vector3<f64>,
-    pub pos_offsets: Vec<nalgebra::Vector3<f64>>,
     pub rot_offset_quats: Vec<nalgebra::UnitQuaternion<f64>>,
     pub joint_types: Vec<String>,
     pub num_dof: usize,
@@ -42,12 +41,11 @@ impl Arm{
         }
         __do_rot_offset.push(true);
 
-        let mut pos_offsets: Vec<nalgebra::Vector3<f64>> = Vec::new();
+        let mut displacements: Vec<nalgebra::Vector3<f64>> = Vec::new();
         for i in 1..disp_offsets.len() {
-            pos_offsets.push(disp_offsets[i].clone());
+            displacements.push(disp_offsets[i].clone());
         }
 
-        let mut rot_offset_matrices: Vec<nalgebra::Matrix3<f64>> = Vec::new();
         let mut rot_offset_quats: Vec<nalgebra::UnitQuaternion<f64>> = Vec::new();
         for i in 0..rot_offsets.len() {
             rot_offset_quats.push(rot_offsets[i]);
@@ -124,8 +122,12 @@ impl Arm{
             }
         }
 
-
-        Arm{axis_types, displacements: pos_offsets.clone(), disp_offset, pos_offsets, rot_offset_quats,
+        println!("displacements: {:?}", displacements);
+        println!("__is_revolute_or_continuous: {:?}", __is_revolute_or_continuous);
+        println!("__do_rot_offset: {:?}", __do_rot_offset);
+        println!("rot_offset_quats: {:?}", rot_offset_quats);
+        println!("joint_types: {:?}", joint_types);
+        Arm{axis_types, displacements, disp_offset,  rot_offset_quats,
             joint_types, num_dof, out_positions, out_rot_quats, __do_rot_offset, __is_prismatic,
             __is_revolute_or_continuous, __is_fixed, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y,
             __is_neg_z, __aux_matrix}

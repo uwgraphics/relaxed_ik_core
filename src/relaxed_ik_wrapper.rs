@@ -12,8 +12,7 @@ pub unsafe extern "C" fn relaxed_ik_new(path_to_setting: *const c_char) -> *mut 
     { 
         let path_to_src = get_path_to_src();
         let default_path_to_setting = path_to_src +  "configs/settings.yaml";
-        return 
-        Box::into_raw(Box::new(RelaxedIK::load_settings(default_path_to_setting.as_str())))
+        return Box::into_raw(Box::new(RelaxedIK::load_settings(default_path_to_setting.as_str())))
     }
     let c_str = std::ffi::CStr::from_ptr(path_to_setting);
     let path_to_setting_str = c_str.to_str().expect("Not a valid UTF-8 string");
@@ -199,5 +198,17 @@ fn solve_velocity_helper(relaxed_ik: &mut RelaxedIK, pos_vels: Vec<f64>, rot_vel
     }
 
     let x = relaxed_ik.solve();
+
+
+    let frames = relaxed_ik.vars.robot.get_frames_immutable(&x);
+    let last = frames[0].0.len() - 1 ;
+    let ee_pos = frames[0].0[last];
+    let goal = relaxed_ik.vars.goal_positions[0];
+    let dist = (ee_pos - goal).norm();
+
+    for i in 0..frames[0].0.len()-1 {
+        println!("i: {}, {:?}, {:?}", i, frames[0].0[i], frames[0].1[i]);
+    }
+
     return x;
 }

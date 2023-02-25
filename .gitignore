@@ -11,3 +11,6 @@ Cargo.lock
 **/*.rs.bk
 
 wrappers/__pycache__/
+
+# webassembly files
+/pkg/
