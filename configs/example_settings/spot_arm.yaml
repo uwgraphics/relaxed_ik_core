@@ -4,6 +4,5 @@ base_links:
   - body
 ee_links:
   - tool_tip
-starting_config: [ 0.4, -2.6, 2.9, -2.3, -0.30, -0.3 ]
-joint_ordering: ["arm_joint1", "arm_joint2", "arm_joint3", "arm_joint4", "arm_joint5", "arm_joint6"]
+starting_config: [ 0.0, -1.10, 2.00, 0.0, -0.90, 0.0 ]
 obstacles:

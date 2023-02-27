@@ -7,5 +7,4 @@ ee_links:
   - right_hand
   - left_hand
 starting_config: [0.0, -0.0003125999999995521, 1.5704593245206757, 0.8793927999999999, 0.0, -6.462112780614149e-05, 0.0, 0.0, -0.0003125999999995521, -1.5704593245206757, 0.8793927999999999, 0.0, -6.462112780614149e-05, 0.0]
-joint_ordering: [ "right_s0", "right_s1", "right_e0", "right_e1", "right_w0", "right_w1", "right_w2", "left_s0", "left_s1", "left_e0", "left_e1", "left_w0", "left_w1", "left_w2" ]
 obstacles:

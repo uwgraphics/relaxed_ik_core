@@ -117,55 +117,6 @@ impl RelaxedIKVars {
 
     }
 
-    // pub fn new( config: VarsConstructorData) -> Self {
-
-    //     let robotConfig = RobotConstructorData {
-    //         num_chains: config.joint_names.len(),
-    //         num_dof: config.joint_ordering.len(),
-    //         joint_names: config.joint_names,
-    //         joint_ordering: config.joint_ordering,
-    //         collision_file_name: config.collision_file_name,
-    //         collision_nn_file: config.collision_nn_file,
-    //         axis_types: config.axis_types,
-    //         velocity_limits: config.velocity_limits,
-    //         joint_limits: config.joint_limits,
-    //         displacements: config.displacements,
-    //         disp_offsets: config.disp_offsets,
-    //         rot_offsets: config.rot_offsets,
-    //         joint_types: config.joint_types
-    //     };
-    //     let mut robot = Robot::new(robotConfig);
-    //     let num_chains = robot.num_chains;
-    //     let position_mode_relative = true;
-    //     let rotation_mode_relative = true; 
-    //     let starting_config = config.starting_config;
-
-    //     let mut goal_positions: Vec<Vector3<f64>> = Vec::new();
-    //     let mut goal_quats: Vec<UnitQuaternion<f64>> = Vec::new();
-    //     let mut goal_quat_vectors: Vec<Vec<Vector3<f64>>> = Vec::new();
-    //     let mut goal_quat_constraints: Vec<Vec<u32>> = Vec::new();
-
-    //     let init_ee_positions = robot.get_ee_positions(starting_config.as_slice());
-    //     let init_ee_quats = robot.get_ee_quats(starting_config.as_slice());
-
-    //     for i in 0..num_chains {
-    //         goal_positions.push(init_ee_positions[i]);
-    //         goal_quats.push(init_ee_quats[i]);
-    //     }
-
-    //     let collision_nn = CollisionNN::new(nn_config);
-
-    //     let env_collision_file = EnvCollisionFileParser::new(env_config);
-    //     let frames = robot.get_frames_immutable(&starting_config.clone());
-    //     let env_collision = RelaxedIKEnvCollision::init_collision_world(env_collision_file, &frames);
-
-    //     RelaxedIKVars{robot, init_state: starting_config.clone(), xopt: starting_config.clone(),
-    //         prev_state: starting_config.clone(), prev_state2: starting_config.clone(), prev_state3: starting_config.clone(),
-    //         goal_positions, goal_quats,
-    //         init_ee_positions, init_ee_quats, position_mode_relative, rotation_mode_relative,
-    //         collision_nn, env_collision}
-    // }
-
     pub fn update(&mut self, xopt: Vec<f64>) {
         self.prev_state3 = self.prev_state2.clone();
         self.prev_state2 = self.prev_state.clone();
@@ -173,11 +124,24 @@ impl RelaxedIKVars {
         self.xopt = xopt.clone();
     }
 
-    pub fn reset(&mut self, xopt: Vec<f64>) {
-        self.prev_state3 = xopt.clone();
-        self.prev_state2 = xopt.clone();
-        self.prev_state = xopt.clone();
-        self.xopt = xopt.clone();
+    pub fn reset(&mut self, init_state: Vec<f64>) {
+        self.prev_state3 = init_state.clone();
+        self.prev_state2 = init_state.clone();
+        self.prev_state = init_state.clone();
+        self.xopt = init_state.clone();
+        self.init_state = init_state.clone();
+
+        let mut init_ee_positions: Vec<Vector3<f64>> = Vec::new();
+        let mut init_ee_quats: Vec<UnitQuaternion<f64>> = Vec::new();
+        let pose = self.robot.get_ee_pos_and_quat_immutable(&init_state);
+
+        for i in 0..pose.len() {
+            init_ee_positions.push(pose[i].0);
+            init_ee_quats.push(pose[i].1);
+        }
+
+        self.init_ee_positions = init_ee_positions.clone();
+        self.init_ee_quats = init_ee_quats.clone();
     }
 
 }
