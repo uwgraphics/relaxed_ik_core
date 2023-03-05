@@ -1,18 +1,20 @@
 # RangedIK Core
 
+Implementation of our ICRA'23 paper: *RangedIK: An Optimization-Based Robot Motion Generation Method for Ranged-Goal Tasks*
+
+[[Pre-print](https://arxiv.org/pdf/2302.13935.pdf)]  [[Video](https://www.youtube.com/watch?v=_QVAetYbpEY)] 
+
 ## Introduction
-
-This solver implements the methods discussed in our paper: [*RangedIK: An Optimization-Based Robot Motion Generation Method for Ranged-Goal Tasks*][Link to appear][Video to appear]
-
 [Introduction Plase holder]
 
-## Getting Started
+## Getting Started 
 
 1. [Install Rust](https://www.rust-lang.org/learn/get-started)
 2. Compile:
     ```bash
     cargo build
     ```
+   The compiled library is at `/target/debug/librelaxed_ik_lib.so`
 3. Run a small demo:
     ```bash
     cargo run --bin relaxed_ik_bin
@@ -21,13 +23,37 @@ This solver implements the methods discussed in our paper: [*RangedIK: An Optimi
 1. Place your robot's URDF under `configs/urdfs/`
 2. Make a setting file. Examples are under `configs/example_settings`
 
-### Wrappers 
-`wrappers/python_wrapper.py` provides a python wrapper. 
+### Python (ROS) wrapper
+`wrappers/python_wrapper.py` provides a python wrapper, which is used by the ROS 1 wrapper: [relaxed-ik-ros1](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik)
 
-`relaxed_ik_ros1/scripts/relaxed_ik_rust.py` is an example to use the python wrapper.
+[`relaxed_ik_ros1/scripts/relaxed_ik_rust.py`](https://github.com/uwgraphics/relaxed_ik_ros1/blob/ranged-ik/scripts/relaxed_ik_rust.py) provides an example of using the python wrapper.
 
+### JavaScript (WebAssembly) wrapper
+1. [Install Rust](https://www.rust-lang.org/tools/install) 
+2. `cargo install wasm-pack`
+    * if there is a `linker 'cc' not found` error, run `sudo apt install gcc`
+	* if it complains about openssl, on Ubuntu install it by `sudo apt-get install libssl-dev pkg-config openssl`. For windows, download and install [perl](https://strawberryperl.com/).
+3. Compile to WebAssembly
+    ```
+    wasm-pack build --target web
+    ```
+4. [relaxed-ik-web-demo](https://github.com/yepw/relaxed-ik-web-demo) provides an example of running relaxed-ik in browser. 
+
+## Supplementary Video
+
+[YouTube video link](https://www.youtube.com/watch?v=_QVAetYbpEY)
 
 ## Citation
+
+If you use RangedIK, please cite our ICRA paper: [*RangedIK: An Optimization-based Robot Motion Generation Method for Ranged-Goal Tasks*](https://arxiv.org/abs/2302.13935)
+```
+@article{wang2023rangedik,
+  title={RangedIK: An Optimization-based Robot Motion Generation Method for Ranged-Goal Tasks},
+  author={Wang, Yeping and Praveena, Pragathi and Rakita, Daniel and Gleicher, Michael},
+  journal={arXiv preprint arXiv:2302.13935},
+  year={2023}
+}
+```
 
 If you use RelaxedIK, please cite our RSS paper: [*RelaxedIK: Real-time Synthesis of Accurate and Feasible Robot Arm Motion*](http://www.roboticsproceedings.org/rss14/p43.html)
 ```
@@ -78,8 +104,3 @@ or [*An Autonomous Dynamic Camera Method for Effective Remote Teleoperation*](ht
 }
 ```
 
-### Todo list
-
-- [ ] Add demo that exploit tolerances
-- [ ] Support environment collision avoidance
-- [ ] Add wrapper for JavaScript
