@@ -39,8 +39,8 @@ opt-level = 3
 opt-level = 3
 
 [lib]
-# name = "relaxed_ik_lib"
+name = "relaxed_ik_lib"
 path = "src/lib.rs"
-# crate-type = ["rlib", "dylib", "cdylib"]
+crate-type = ["rlib",  "cdylib"]
 # path = "src/relaxed_ik_web.rs"
-crate-type = ["cdylib"]
+# crate-type = ["cdylib"]

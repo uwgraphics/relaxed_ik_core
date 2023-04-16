@@ -1,0 +1,8 @@
+urdf: mobile_spot_arm.urdf
+link_radius: 0.05 
+base_links:
+  - world
+ee_links:
+  - tool_tip
+starting_config: [  0.0,  0.0, 0.0, -1.10, 2.00, 0.0, -0.90, 0.0 ]
+obstacles:

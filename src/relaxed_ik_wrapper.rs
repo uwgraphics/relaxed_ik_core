@@ -206,9 +206,5 @@ fn solve_velocity_helper(relaxed_ik: &mut RelaxedIK, pos_vels: Vec<f64>, rot_vel
     let goal = relaxed_ik.vars.goal_positions[0];
     let dist = (ee_pos - goal).norm();
 
-    for i in 0..frames[0].0.len()-1 {
-        println!("i: {}, {:?}, {:?}", i, frames[0].0[i], frames[0].1[i]);
-    }
-
     return x;
 }
