@@ -6,6 +6,7 @@ use crate::utils_rust::transformations::{*};
 use wasm_bindgen::prelude::*;
 use js_sys::Array;
 extern crate serde_json;
+use web_sys;
 extern crate console_error_panic_hook;
 use nalgebra::{UnitQuaternion, Vector3, Vector6, Quaternion, Point3};
 

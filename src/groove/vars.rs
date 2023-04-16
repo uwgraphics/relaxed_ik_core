@@ -12,7 +12,7 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct VarsConstructorData {
-    pub urdf: String,
+    // pub urdf: String,
     pub link_radius:f64,
     pub base_links: Vec<String>,
     pub ee_links: Vec<String>,
