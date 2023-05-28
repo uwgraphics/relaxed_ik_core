@@ -2,10 +2,10 @@
 
 Implementation of our ICRA'23 paper: *RangedIK: An Optimization-Based Robot Motion Generation Method for Ranged-Goal Tasks*
 
-[[Pre-print](https://arxiv.org/pdf/2302.13935.pdf)]  [[Video](https://www.youtube.com/watch?v=_QVAetYbpEY)] 
+[[Pre-print](https://arxiv.org/pdf/2302.13935.pdf)]  [[Supplementary Video](https://www.youtube.com/watch?v=_QVAetYbpEY)] [[Presentation Video](https://www.youtube.com/watch?v=IKy0Yda8p4)] [[Poster](https://yepw.github.io/files/icra23_poster.pdf)]
 
 ## Introduction
-[Introduction Plase holder]
+RangedIK is a real-time motion synthesis method that exploits range flexibility to satisfy multiple kinematic requirements. RangedIK is particularly suitable for applications that allow some tolerance, such as wielding where the tool is allowed rotate along its principle axis. For more information, please refer to [our paper](https://arxiv.org/pdf/2302.13935.pdf). 
 
 ## Getting Started 
 
