@@ -19,6 +19,7 @@ lib.solve_position.argtypes = [ctypes.POINTER(RelaxedIKS), ctypes.POINTER(ctypes
 lib.solve_position.restype = Opt
 lib.solve_velocity.argtypes = [ctypes.POINTER(RelaxedIKS), ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), ctypes.c_int]
 lib.solve_velocity.restype = Opt
+lib.reset.argtypes = [ctypes.POINTER(RelaxedIKS)]
 
 class RelaxedIKRust:
     def __init__(self, setting_file_path = None):
@@ -72,6 +73,12 @@ class RelaxedIKRust:
             tole_arr[i] = tolerances[i]
         xopt = lib.solve_velocity(self.obj, linear_arr, len(linear_arr), angular_arr, len(angular_arr), tole_arr, len(tole_arr))
         return xopt.data[:xopt.length]
+    
+    def reset(self, joint_state):
+        js_arr = (ctypes.c_double * len(joint_state))()
+        for i in range(len(joint_state)):
+            js_arr[i] = joint_state[i]
+        lib.reset(self.obj, js_arr, len(js_arr))
 
 if __name__ == '__main__':
     pass
