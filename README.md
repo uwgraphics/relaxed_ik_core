@@ -23,12 +23,20 @@ RangedIK is a real-time motion synthesis method that exploits range flexibility 
 1. Place your robot's URDF under `configs/urdfs/`
 2. Make a setting file. Examples are under `configs/example_settings`
 
-### Python (ROS) wrapper
-`wrappers/python_wrapper.py` provides a python wrapper, which is used by the ROS 1 wrapper: [relaxed-ik-ros1](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik)
+### ROS Wrapper
+We provide both ROS 1 and ROS 2 wrappers of our tool.
 
+[ROS 1 wrapper](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik) (ranged-ik branch)
+
+[ROS 2 wrapper](https://github.com/uwgraphics/relaxed_ik_ros2)
+
+### Python wrapper
+`wrappers/python_wrapper.py` provides a python wrapper, which is used by both the [ROS 1 wrapper](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik)
+ and [ROS 2 wrapper](https://github.com/uwgraphics/relaxed_ik_ros2).
 [`relaxed_ik_ros1/scripts/relaxed_ik_rust.py`](https://github.com/uwgraphics/relaxed_ik_ros1/blob/ranged-ik/scripts/relaxed_ik_rust.py) provides an example of using the python wrapper.
 
 ### JavaScript (WebAssembly) wrapper
+[Online demo](https://yepw.github.io/relaxed-ik-web-demo/)
 1. [Install Rust](https://www.rust-lang.org/tools/install) 
 2. `cargo install wasm-pack`
     * if there is a `linker 'cc' not found` error, run `sudo apt install gcc`
