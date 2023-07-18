@@ -1,5 +1,9 @@
 # CollisionIK Core
 
+Note: if you encounter a compilation error, please refer to [this issue](https://github.com/uwgraphics/relaxed_ik_ros1/issues/7).
+
+Meanwhile, the [ranged-ik](https://github.com/uwgraphics/relaxed_ik_core/tree/ranged-ik) branch is recently maintained and works with more recent rust versions.
+
 ## Introduction
 
 [documentation](https://uwgraphics.github.io/relaxed_ik_core/)
