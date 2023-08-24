@@ -5,7 +5,6 @@ use nalgebra::{Vector3, Vector6, UnitQuaternion, Unit, Matrix, DMatrix, DVector,
 pub struct Arm {
     pub axis_types: Vec<String>,
     pub displacements: Vec<nalgebra::Vector3<f64>>,
-    pub disp_offset: nalgebra::Vector3<f64>,
     pub rot_offset_quats: Vec<nalgebra::UnitQuaternion<f64>>,
     pub joint_types: Vec<String>,
     pub num_dof: usize,
@@ -32,17 +31,16 @@ impl Arm{
         let num_dof = axis_types.len();
 
         let mut __do_rot_offset: Vec<bool> = Vec::new();
-        for i in 0..rot_offsets.len()-1 {
+        for i in 0..rot_offsets.len() {
             if rot_offsets[i][0] == 0.0 && rot_offsets[i][1] == 0.0 && rot_offsets[i][2] == 0.0 {
                 __do_rot_offset.push(false);
             } else {
                 __do_rot_offset.push(true);
             }
         }
-        __do_rot_offset.push(true);
 
         let mut displacements: Vec<nalgebra::Vector3<f64>> = Vec::new();
-        for i in 1..disp_offsets.len() {
+        for i in 0..disp_offsets.len() {
             displacements.push(disp_offsets[i].clone());
         }
 
@@ -57,11 +55,6 @@ impl Arm{
             out_positions.push(nalgebra::Vector3::new(0.,0.,0.));
             out_rot_quats.push(nalgebra::UnitQuaternion::identity());
         }
-
-        let disp_offset = nalgebra::Vector3::new(0.,0.,0.);
-
-        out_positions[0] = disp_offset;
-        out_rot_quats[0] = rot_offset_quats[0];
 
         let mut __is_prismatic: Vec<bool> = Vec::new();
         let mut __is_revolute_or_continuous: Vec<bool> = Vec::new();
@@ -122,54 +115,37 @@ impl Arm{
             }
         }
 
-        println!("displacements: {:?}", displacements);
-        println!("__is_revolute_or_continuous: {:?}", __is_revolute_or_continuous);
-        println!("__do_rot_offset: {:?}", __do_rot_offset);
-        println!("rot_offset_quats: {:?}", rot_offset_quats);
-        println!("joint_types: {:?}", joint_types);
-        Arm{axis_types, displacements, disp_offset,  rot_offset_quats,
+        // println!("displacements: {:?}", displacements);
+        // println!("axis_types: {:?}", axis_types);
+        // println!("__is_revolute_or_continuous: {:?}", __is_revolute_or_continuous);
+        // println!("__do_rot_offset: {:?}", __do_rot_offset);
+        // println!("rot_offset_quats: {:?}", rot_offset_quats);
+        // println!("joint_types: {:?}", joint_types);
+        Arm{axis_types, displacements, rot_offset_quats,
             joint_types, num_dof, out_positions, out_rot_quats, __do_rot_offset, __is_prismatic,
             __is_revolute_or_continuous, __is_fixed, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y,
             __is_neg_z, __aux_matrix}
-    }
-
-    pub fn get_frames(&mut self, x: &[f64]) {
-        let mut joint_idx: usize = 0;
-        for i in 0..self.displacements.len() {
-
-            if self.__is_revolute_or_continuous[i] || self.__is_prismatic[i] {
-                self.__update_frames(i, x[joint_idx], self.__do_rot_offset[i + 1],
-                                     self.__is_prismatic[i], self.__is_revolute_or_continuous[i],
-                                     self.__is_fixed[i], self.__is_x[joint_idx], self.__is_y[joint_idx],
-                                     self.__is_z[joint_idx], self.__is_neg_x[joint_idx],
-                                     self.__is_neg_y[joint_idx], self.__is_neg_z[joint_idx]);
-            } else {
-                if self.__do_rot_offset[i+1] {
-                    self.__update_fixed_ro(i)
-                } else {
-                    self.__update_fixed(i)
-                }
-            }
-
-            if self.__is_revolute_or_continuous[i] || self.__is_prismatic[i] {
-                joint_idx += 1;
-            }
-        }
     }
 
     pub fn get_frames_immutable(&self, x: &[f64]) -> (Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>) {
         let mut out_positions: Vec<nalgebra::Vector3<f64>> = Vec::new();
         let mut out_rot_quats: Vec<nalgebra::UnitQuaternion<f64>> = Vec::new();
 
-        let mut pt: nalgebra::Vector3<f64> = self.disp_offset.clone();
-        let mut rot_quat = self.rot_offset_quats[0].clone();
+        let mut pt: nalgebra::Vector3<f64> = nalgebra::Vector3::new(0.,0.,0.);
+        let mut rot_quat = nalgebra::UnitQuaternion::identity();
        
         out_positions.push(pt);
-        // out_rot_quats.push(rot_quat);
+        out_rot_quats.push(rot_quat);
 
         let mut joint_idx: usize = 0;
         for i in 0..self.displacements.len() {
             if self.__is_revolute_or_continuous[i] {
+
+                pt = rot_quat * self.displacements[i] + pt;
+
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
+                }
 
                 let joint_val = x[joint_idx];
                 if self.__is_x[joint_idx] {
@@ -186,14 +162,8 @@ impl Arm{
                     rot_quat = rot_quat * get_quat_z(-joint_val);
                 }
 
-                pt = rot_quat * self.displacements[i] + pt;
-
                 out_positions.push(pt.clone());
                 out_rot_quats.push(rot_quat.clone());
-
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i + 1];
-                }
 
                 joint_idx += 1;
             }
@@ -212,8 +182,8 @@ impl Arm{
                 } else if self.__is_neg_z[joint_idx] {
                     pt = rot_quat * self.displacements[i] + pt + nalgebra::Vector3::new(0., 0., -joint_val);
                 }
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i + 1];
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
                 }
                 out_positions.push(pt.clone());
                 out_rot_quats.push(rot_quat.clone());
@@ -221,8 +191,8 @@ impl Arm{
             }
             else {
                 pt = rot_quat * self.displacements[i] + pt;
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i+1];
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
                 }
                 out_positions.push(pt.clone());
                 out_rot_quats.push(rot_quat.clone());
@@ -250,8 +220,8 @@ impl Arm{
 
         let mut jacobian: DMatrix<f64> = DMatrix::identity(6, x.len());
 
-        for i in 0..self.displacements.len() {
-            if self.__is_revolute_or_continuous[i] {
+        for i in 1..self.displacements.len() {
+            if self.__is_revolute_or_continuous[i-1] {
                 disp = ee_position - joint_positions[i];
                 if self.__is_x[joint_idx] {
                     p_axis = joint_rot_quats[i] * pos_x
@@ -274,6 +244,7 @@ impl Arm{
                 joint_idx += 1;
             }
         }
+
         jacobian
     }
 
@@ -283,12 +254,18 @@ impl Arm{
     }
 
     pub fn get_ee_pos_and_quat_immutable(&self, x: &[f64]) -> (nalgebra::Vector3<f64>, nalgebra::UnitQuaternion<f64>) {
-        let mut pt: nalgebra::Vector3<f64> = self.disp_offset.clone();
-        let mut rot_quat = self.rot_offset_quats[0].clone();
+        let mut pt: nalgebra::Vector3<f64> = nalgebra::Vector3::new(0.,0.,0.);
+        let mut rot_quat = nalgebra::UnitQuaternion::identity();
 
         let mut joint_idx: usize = 0;
         for i in 0..self.displacements.len() {
             if self.__is_revolute_or_continuous[i] {
+                pt = rot_quat * self.displacements[i] + pt;
+
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
+                }
+
                 let joint_val = x[joint_idx];
                 if self.__is_x[joint_idx] {
                     rot_quat = rot_quat * get_quat_x(joint_val);
@@ -302,11 +279,6 @@ impl Arm{
                     rot_quat = rot_quat * get_quat_y(-joint_val);
                 } else if self.__is_neg_z[joint_idx] {
                     rot_quat = rot_quat * get_quat_z(-joint_val);
-                }
-
-                pt = rot_quat * self.displacements[i] + pt;
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i + 1];
                 }
 
                 joint_idx += 1;
@@ -326,173 +298,20 @@ impl Arm{
                 } else if self.__is_neg_z[joint_idx] {
                     pt = rot_quat * self.displacements[i] + pt + nalgebra::Vector3::new(0., 0., -joint_val);
                 }
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i + 1];
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
                 }
                 joint_idx += 1;
             }
             else {
                 pt = rot_quat * self.displacements[i] + pt;
-                if self.__do_rot_offset[i+1] {
-                    rot_quat = rot_quat * self.rot_offset_quats[i+1];
+                if self.__do_rot_offset[i] {
+                    rot_quat = rot_quat * self.rot_offset_quats[i];
                 }
             }
         }
 
         (pt, rot_quat)
-    }
-
-    pub fn get_ee_position(&mut self, x: &[f64]) -> nalgebra::Vector3<f64> {
-        self.get_frames(x);
-        let last_index = self.out_positions.len() - 1;
-        self.out_positions[last_index].clone()
-    }
-
-    pub fn get_ee_quat(&mut self, x: &[f64]) -> nalgebra::UnitQuaternion<f64> {
-        self.get_frames(x);
-        let last_index = self.out_rot_quats.len() - 1;
-        self.out_rot_quats[last_index].clone()
-    }
-
-    fn __update_frames(&mut self, i: usize, joint_val: f64, __do_rot_offset: bool, __is_prismatic: bool,
-                       __is_revolute_or_continuous: bool, __is_fixed: bool, __is_x: bool, __is_y: bool,
-                       __is_z: bool, __is_neg_x: bool, __is_neg_y: bool, __is_neg_z: bool) {
-        if __is_prismatic {
-            if __do_rot_offset {
-                self.__update_prismatic_ro(i, joint_val, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y, __is_neg_z);
-            }
-            else {
-                self.__update_prismatic(i, joint_val, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y, __is_neg_z);
-            }
-        }
-        else if __is_revolute_or_continuous {
-            if __do_rot_offset {
-                self.__update_revolute_or_continuous_ro(i, joint_val, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y, __is_neg_z);
-            }
-            else {
-                self.__update_revolute_or_continuous(i, joint_val, __is_x, __is_y, __is_z, __is_neg_x, __is_neg_y, __is_neg_z);
-            }
-        }
-        else if __is_fixed {
-            if __do_rot_offset {
-                self.__update_fixed_ro(i);
-            }
-            else {
-                self.__update_fixed(i);
-            }
-        }
-    }
-
-    fn __update_prismatic(&mut self, i: usize, joint_val: f64, __is_x: bool, __is_y: bool,
-                       __is_z: bool, __is_neg_x: bool, __is_neg_y: bool, __is_neg_z: bool) {
-
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i];
-
-        if __is_x {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(joint_val, 0., 0.);
-        }
-        else if __is_y {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., joint_val, 0.);
-        }
-        else if __is_z {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., 0., joint_val);
-        }
-        else if __is_neg_x {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(-joint_val, 0., 0.);
-        }
-        else if __is_neg_y {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., -joint_val, 0.);
-        }
-        else if __is_neg_z {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., 0., -joint_val);
-        }
-    }
-
-    fn __update_prismatic_ro(&mut self, i: usize, joint_val: f64, __is_x: bool, __is_y: bool,
-                       __is_z: bool, __is_neg_x: bool, __is_neg_y: bool, __is_neg_z: bool) {
-
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i];
-
-        if __is_x {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(joint_val, 0., 0.);
-        }
-        else if __is_y {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., joint_val, 0.);
-        }
-        else if __is_z {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., 0., joint_val);
-        }
-        else if __is_neg_x {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(-joint_val, 0., 0.);
-        }
-        else if __is_neg_y {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., -joint_val, 0.);
-        }
-        else if __is_neg_z {
-            self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i] + nalgebra::Vector3::new(0., 0., -joint_val);
-        }
-
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i + 1] * self.rot_offset_quats[i+1];
-
-    }
-
-    fn __update_revolute_or_continuous(&mut self, i: usize, joint_val: f64, __is_x: bool, __is_y: bool,
-                       __is_z: bool, __is_neg_x: bool, __is_neg_y: bool, __is_neg_z: bool) {
-        if __is_x {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_x(joint_val);
-        }
-        else if __is_y {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_y(joint_val);
-        }
-        else if __is_z {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_z(joint_val);
-        }
-        else if __is_neg_x {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_x(joint_val);
-        }
-        else if __is_neg_y {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_y(joint_val);
-        }
-        else if __is_neg_z {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_x(joint_val);
-        }
-
-        self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i];
-    }
-
-    fn __update_revolute_or_continuous_ro(&mut self, i: usize, joint_val: f64, __is_x: bool, __is_y: bool,
-                       __is_z: bool, __is_neg_x: bool, __is_neg_y: bool, __is_neg_z: bool) {
-        if __is_x {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_x(joint_val);
-        }
-        else if __is_y {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_y(joint_val);
-        }
-        else if __is_z {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_quat_z(joint_val);
-        }
-        else if __is_neg_x {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_x(joint_val);
-        }
-        else if __is_neg_y {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_y(joint_val);
-        }
-        else if __is_neg_z {
-            self.out_rot_quats[i + 1] = self.out_rot_quats[i] * get_neg_quat_x(joint_val);
-        }
-
-        self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i];
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i + 1] * self.rot_offset_quats[i+1];
-    }
-
-    fn __update_fixed(&mut self, i: usize) {
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i];
-        self.out_positions[i + 1] = self.out_rot_quats[i + 1] * self.displacements[i] + self.out_positions[i];
-    }
-
-    fn __update_fixed_ro(&mut self, i: usize) {
-        self.out_positions[i + 1] = self.out_rot_quats[i] * self.displacements[i] + self.out_positions[i];
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i] * self.rot_offset_quats[i];
     }
 }
 

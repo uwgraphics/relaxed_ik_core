@@ -274,6 +274,9 @@ impl EachJointLimits {
 impl ObjectiveTrait for EachJointLimits {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
     
+        if v.robot.lower_joint_limits[self.joint_idx] == -999.0 && v.robot.upper_joint_limits[self.joint_idx] == 999.0 {
+            return -1.0;
+        }
         let l = v.robot.lower_joint_limits[self.joint_idx];
         let u = v.robot.upper_joint_limits[self.joint_idx];
         swamp_loss(x[self.joint_idx], l, u, 10.0, 10.0, 20)
