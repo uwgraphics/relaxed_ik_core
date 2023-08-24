@@ -1,0 +1,8 @@
+urdf: jaco.urdf
+link_radius: 0.05 
+base_links:
+  - j2s7s300_link_base
+ee_links:
+  - j2s7s300_link_7
+starting_config: [ 0.0, 0.0, -1.5708, 1.5708, 0.0, -1.5708, 0.0 ]
+obstacles:

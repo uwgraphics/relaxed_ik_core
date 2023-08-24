@@ -1,0 +1,8 @@
+urdf: fetch.urdf
+link_radius: 0.05 
+base_links:
+  - torso_lift_link
+ee_links:
+  - gripper_link
+starting_config: [ 0.0, 0.0, -1.5708, 1.5708, 0.0, -1.5708, 0.0 ]
+obstacles:
