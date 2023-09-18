@@ -464,7 +464,7 @@ impl Arm{
 
     fn __update_fixed_ro(&mut self, i: usize) {
         self.out_positions[i + 1] = self.out_rot_quats[i] * self.displacements[i] + self.out_positions[i];
-        self.out_rot_quats[i + 1] = self.out_rot_quats[i] * self.rot_offset_quats[i];
+        self.out_rot_quats[i + 1] = self.out_rot_quats[i] * self.rot_offset_quats[i+1];
         self.out_rot_mats[i + 1] = *self.out_rot_quats[i].to_rotation_matrix().matrix();
     }
 }
