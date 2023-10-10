@@ -5,7 +5,22 @@ Implementation of our ICRA'23 paper: *RangedIK: An Optimization-Based Robot Moti
 [[Pre-print](https://arxiv.org/pdf/2302.13935.pdf)]  [[Supplementary Video](https://www.youtube.com/watch?v=_QVAetYbpEY)] [[Presentation Video](https://www.youtube.com/watch?v=IKy0Yda8p4)] [[Poster](https://yepw.github.io/files/icra23_poster.pdf)]
 
 ## Introduction
-RangedIK is a real-time motion synthesis method that exploits range flexibility to satisfy multiple kinematic requirements. RangedIK is particularly suitable for applications that allow some tolerance, such as wielding where the tool is allowed rotate along its principle axis. For more information, please refer to [our paper](https://arxiv.org/pdf/2302.13935.pdf). 
+RangedIK is a real-time motion synthesis method that exploits range flexibility to satisfy multiple kinematic requirements. RangedIK is particularly suitable for applications that allow some tolerance, such as wielding where the tool is allowed to rotate along its principle axis. For more information, please refer to [our paper](https://arxiv.org/pdf/2302.13935.pdf). 
+
+## The RelaxedIK Family
+[RangedIK](https://arxiv.org/pdf/2302.13935.pdf) extends [RelaxedIK](https://github.com/uwgraphics/relaxed_ik_core/tree/relaxed-ik) by leveraging the flexibility afforded by tolerances. Also, RangedIK is recently maintained and works with more recent rust versions.
+
+[CollisionIK](https://github.com/uwgraphics/relaxed_ik_core/tree/collision-ik) extends [RelaxedIK](https://github.com/uwgraphics/relaxed_ik_core/tree/relaxed-ik) by avoiding collisions with static or dynamic obstacles in the environment.
+
+We provide a series of wrappers for our tools to be used in various platform or software. 
+
+||**ROS1**|**ROS2**|**WebAssembly**|**Coppeliasim**|**Mujoco**|  
+|:------|:-----|:-----|:-----|:-----|:-----| 
+|**RangedIK**|[link](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik)|[link](https://github.com/uwgraphics/relaxed_ik_ros2)|[link](https://github.com/yepw/relaxed-ik-web-demo/)|x|x|  
+|**CollisionIK**|[link](https://github.com/uwgraphics/relaxed_ik_ros1/)|x|x|x|x|  
+|**RelaxedIK**|[link](https://github.com/uwgraphics/relaxed_ik_ros1/)|x|x|[link](https://github.com/uwgraphics/relaxed_ik_coppeliasim)|[link](https://github.com/uwgraphics/relaxed_ik_mujoco)|  
+
+
 
 ## Getting Started 
 
@@ -22,13 +37,6 @@ RangedIK is a real-time motion synthesis method that exploits range flexibility 
 ### Use your own robot
 1. Place your robot's URDF under `configs/urdfs/`
 2. Make a setting file. Examples are under `configs/example_settings`
-
-### ROS Wrapper
-We provide both ROS 1 and ROS 2 wrappers of our tool.
-
-[ROS 1 wrapper](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik) (ranged-ik branch)
-
-[ROS 2 wrapper](https://github.com/uwgraphics/relaxed_ik_ros2)
 
 ### Python wrapper
 `wrappers/python_wrapper.py` provides a python wrapper, which is used by both the [ROS 1 wrapper](https://github.com/uwgraphics/relaxed_ik_ros1/tree/ranged-ik)
@@ -58,7 +66,8 @@ If you use RangedIK, please cite our ICRA paper: [*RangedIK: An Optimization-bas
 @article{wang2023rangedik,
   title={RangedIK: An Optimization-based Robot Motion Generation Method for Ranged-Goal Tasks},
   author={Wang, Yeping and Praveena, Pragathi and Rakita, Daniel and Gleicher, Michael},
-  journal={arXiv preprint arXiv:2302.13935},
+  booktitle={2023 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={9700-9706},
   year={2023}
 }
 ```
