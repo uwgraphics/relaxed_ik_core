@@ -16,6 +16,7 @@ pub struct VarsConstructorData {
     pub link_radius:f64,
     pub base_links: Vec<String>,
     pub ee_links: Vec<String>,
+    pub joint_ordering: Vec<String>,
     starting_config: Vec<f64>
 }
 
@@ -49,7 +50,7 @@ impl RelaxedIKVars {
         let ee_links_arr = settings["ee_links"].as_vec().unwrap();
         let num_chains = base_links_arr.len();
 
-        let mut base_links = Vec::new();
+        let mut base_links: Vec<String> = Vec::new();
         let mut ee_links = Vec::new();
         let mut tolerances: Vec<Vector6<f64>> = Vec::new();
         for i in 0..num_chains {
@@ -58,8 +59,18 @@ impl RelaxedIKVars {
             tolerances.push(Vector6::new(0., 0., 0., 0., 0., 0.));
         }
 
+        let joint_ordering = if let Some(joint_ordering_arr) = settings["joint_ordering"].as_vec() {
+            if joint_ordering_arr.is_empty() {
+                None
+            } else {
+                Some(joint_ordering_arr.iter().filter_map(|item| item.as_str()).map(String::from).collect::<Vec<String>>())
+            }
+        } else {
+            None
+        };
+
         let urdf = &std::fs::read_to_string(path_to_urdf).unwrap();
-        let robot = Robot::from_urdf(urdf, &base_links, &ee_links);
+        let robot = Robot::from_urdf(urdf, &base_links, &ee_links, joint_ordering);
 
         let mut starting_config = Vec::new();
         if settings["starting_config"].is_badvalue() {
@@ -99,7 +110,7 @@ impl RelaxedIKVars {
             tolerances.push(Vector6::new(0., 0., 0., 0., 0., 0.));
         }
 
-        let robot = Robot::from_urdf(urdf, &configs.base_links, &configs.ee_links);
+        let robot = Robot::from_urdf(urdf, &configs.base_links, &configs.ee_links, Some(configs.joint_ordering));
 
         let mut init_ee_positions: Vec<Vector3<f64>> = Vec::new();
         let mut init_ee_quats: Vec<UnitQuaternion<f64>> = Vec::new();

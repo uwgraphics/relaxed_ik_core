@@ -1,0 +1,17 @@
+urdf: shadow_hand.urdf
+link_radius: 0.05
+base_links:
+  - world
+  - world
+  - world
+  - world
+  - world
+ee_links:
+  - rh_fftip
+  - rh_mftip
+  - rh_rftip
+  - rh_lftip
+  - rh_thtip
+joint_ordering: ['rh_WRJ2', 'rh_WRJ1', 'rh_FFJ4', 'rh_FFJ3', 'rh_FFJ2', 'rh_FFJ1', 'rh_MFJ4', 'rh_MFJ3', 'rh_MFJ2', 'rh_MFJ1', 'rh_RFJ4', 'rh_RFJ3', 'rh_RFJ2', 'rh_RFJ1', 'rh_LFJ5', 'rh_LFJ4', 'rh_LFJ3', 'rh_LFJ2', 'rh_LFJ1', 'rh_THJ5', 'rh_THJ4', 'rh_THJ3', 'rh_THJ2', 'rh_THJ1']
+starting_config: [-0.1745, -0.10449999999999998, 0.0, 0.6545, 0.7855, 0.7855, 0.0, 0.6545, 0.7855, 0.7855, 0.0, 0.6545, 0.7855, 0.7855, 0.3925, 0.0, 0.6545, 0.7855, 0.7855, 0.0, 0.611, 0.0, 0.0, 0.6545]
+obstacles:

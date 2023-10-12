@@ -186,7 +186,7 @@ impl ObjectiveTrait for SelfCollision {
         let segment_pos = nalgebra::one();
         // println!("start_pt_1:{} end_pt_1:{}  start_pt_2:{} end_pt_2:{} x: {:?}", start_pt_1, end_pt_1, start_pt_2, end_pt_2, x);
 
-        let dis = query::distance(&segment_pos, &segment_1, &segment_pos, &segment_2).unwrap() - 0.05;
+        let dis = query::distance(&segment_pos, &segment_1, &segment_pos, &segment_2).unwrap() - link_radius;
        
         swamp_loss(dis, 0.02, 1.5, 60.0, 0.0001, 30)
     }

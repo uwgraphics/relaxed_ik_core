@@ -27,7 +27,7 @@ impl RelaxedIK {
 
         let vars = RelaxedIKVars::from_jsvalue(cfg, &urdf);
 
-        let om = ObjectiveMaster::relaxed_ik(&vars.robot.chain_lengths);
+        let om = ObjectiveMaster::relaxed_ik(&vars.robot.chain_indices);
         let groove = OptimizationEngineOpen::new(vars.robot.num_dofs.clone());
         Self{vars, om, groove}
     }

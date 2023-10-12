@@ -23,11 +23,10 @@ impl ObjectiveMaster {
     }
 
 
-    pub fn relaxed_ik(chain_lengths: &[usize]) -> Self {
+    pub fn relaxed_ik(chain_indices: &[Vec<usize>]) -> Self {
         let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
-        let num_chains = chain_lengths.len();
-        let mut num_dofs = 0;
+        let num_chains = chain_indices.len();
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 0)));
             weight_priors.push(50.0);
@@ -43,9 +42,9 @@ impl ObjectiveMaster {
             weight_priors.push(10.0);
             // objectives.push(Box::new(EnvCollision::new(i)));
             // weight_priors.push(1.0);
-            num_dofs += chain_lengths[i];
         }
 
+        let num_dofs = chain_indices.iter().flat_map(|v| v.iter()).cloned().max().unwrap() + 1;
         for j in 0..num_dofs {
             objectives.push(Box::new(EachJointLimits::new(j))); weight_priors.push(0.1 );
         }
@@ -53,11 +52,11 @@ impl ObjectiveMaster {
         objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(0.7);
         objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(0.5);
         objectives.push(Box::new(MinimizeJerk));    weight_priors.push(0.3);
-        objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(1.0);
+        // objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(1.0);
 
         for i in 0..num_chains {
-            for j in 0..chain_lengths[i]-2 {
-                for k in j+2..chain_lengths[i] {
+            for j in 0..chain_indices[i].len()-2 {
+                for k in j+2..chain_indices[i].len() {
                     objectives.push(Box::new(SelfCollision::new(0, j, k))); weight_priors.push(0.01 );
                 }
             }

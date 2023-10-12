@@ -23,7 +23,7 @@ impl RelaxedIK {
         println!("RelaxedIK is using below setting file {}", path_to_setting);
 
         let vars = RelaxedIKVars::from_local_settings(path_to_setting);
-        let om = ObjectiveMaster::relaxed_ik(&vars.robot.chain_lengths);
+        let om = ObjectiveMaster::relaxed_ik(&vars.robot.chain_indices);
 
         let groove = OptimizationEngineOpen::new(vars.robot.num_dofs.clone());
 
@@ -41,7 +41,7 @@ impl RelaxedIK {
         self.groove.optimize(&mut out_x, &self.vars, &self.om, 100);
         
         let frames = self.vars.robot.get_frames_immutable(&out_x);
-
+        
         for i in 0..out_x.len() {
             if (out_x[i].is_nan()) {
                 println!("No valid solution found! Returning previous solution: {:?}. End effector position goals: {:?}", self.vars.xopt, self.vars.goal_positions);
