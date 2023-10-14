@@ -46,21 +46,48 @@ impl ObjectiveMaster {
 
         let num_dofs = chain_indices.iter().flat_map(|v| v.iter()).cloned().max().unwrap() + 1;
         for j in 0..num_dofs {
-            objectives.push(Box::new(EachJointLimits::new(j))); weight_priors.push(0.1 );
+            objectives.push(Box::new(EachJointLimits::new(j)));
+            weight_priors.push(0.1 );
         }
 
-        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(0.7);
-        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(0.5);
-        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(0.3);
-        // objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(1.0);
+        objectives.push(Box::new(MinimizeVelocity));
+        weight_priors.push(0.7);
+        objectives.push(Box::new(MinimizeAcceleration));
+        weight_priors.push(0.5);
+        objectives.push(Box::new(MinimizeJerk));
+        weight_priors.push(0.3);
+        // objectives.push(Box::new(MaximizeManipulability));
+        // weight_priors.push(1.0);
 
+        let self_collision_weight = 0.01;
+        let mut pairs = Vec::new();
         for i in 0..num_chains {
-            for j in 0..chain_indices[i].len()-2 {
+            for j in 0..chain_indices[i].len()-2 {  
                 for k in j+2..chain_indices[i].len() {
-                    objectives.push(Box::new(SelfCollision::new(0, j, k))); weight_priors.push(0.01 );
+                    objectives.push(Box::new(SelfCollision::new(i, i, j, k)));
+                    weight_priors.push(self_collision_weight);
+                    pairs.push((chain_indices[i][j], chain_indices[i][k]));
                 }
             }
         }
+        // println!("Num self-collision pairs: {}", pairs.len());
+
+        for i in 0..num_chains-1 {
+            for j in i+1..num_chains {
+                for ii in 0..chain_indices[i].len() {  
+                    for jj in 0..chain_indices[j].len() {
+                        if !chain_indices[i].contains(&chain_indices[j][jj]) && !chain_indices[j].contains(&chain_indices[i][ii]) {
+                            objectives.push(Box::new(SelfCollision::new(i, j, ii, jj)));
+                            weight_priors.push(self_collision_weight);
+                            pairs.push((chain_indices[i][ii], chain_indices[j][jj]));
+                            // println!("{} {}", chain_indices[i][ii], chain_indices[j][jj]);
+                        }
+                    }
+                }
+                // println!("{} {} Num self-collision pairs: {}", i, j, pairs.len());
+            }
+        }
+        println!("Num self-collision pairs: {}", pairs.len());
         
         Self{objectives, num_chains, weight_priors, lite: false, finite_diff_grad: false}
     }

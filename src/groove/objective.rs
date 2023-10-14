@@ -156,12 +156,13 @@ impl ObjectiveTrait for MatchEERotaDoF {
 }
 
 pub struct SelfCollision {
-    pub arm_idx: usize,
+    pub first_arm: usize,
+    pub second_arm: usize,
     pub first_link: usize,
     pub second_link: usize
 }
 impl SelfCollision {
-    pub fn new(arm_idx: usize, first_link: usize, second_link: usize) -> Self {Self{arm_idx, first_link, second_link}}
+    pub fn new(first_arm: usize, second_arm: usize, first_link: usize, second_link: usize) -> Self {Self{first_arm, second_arm, first_link, second_link}}
 }
 impl ObjectiveTrait for SelfCollision {
     fn call(&self, x: &[f64], v: &vars::RelaxedIKVars, frames: &Vec<(Vec<nalgebra::Vector3<f64>>, Vec<nalgebra::UnitQuaternion<f64>>)>) -> f64 {
@@ -170,24 +171,44 @@ impl ObjectiveTrait for SelfCollision {
                 return 10.0
             }
         }
-       
+
         let mut x_val: f64 = 0.0;
-        let link_radius = 0.05;
+        // let link_radius = 0.05;
 
-        let start_pt_1 = Point3::from(frames[self.arm_idx].0[self.first_link]);
-        let end_pt_1 = Point3::from(frames[self.arm_idx].0[self.first_link+1]);
-        let segment_1 = shape::Segment::new(start_pt_1, end_pt_1);
+        // println!("first_arm: {} second_arm: {} first_link: {} second_link: {}", self.first_arm, self.second_arm, self.first_link, self.second_link);
+  
+        let link_1 = v.robot.link_meshes[self.first_arm][self.first_link+1].clone();
+        let link_2 = v.robot.link_meshes[self.second_arm][self.second_link+1].clone();
 
-        let mut start_pt_2 = Point3::from(frames[self.arm_idx].0[self.second_link]);
-        let mut end_pt_2 = Point3::from(frames[self.arm_idx].0[self.second_link+1]);
+        let vec_1 = &frames[self.first_arm].0[self.first_link];
+        let tra_1 = Translation3::new(vec_1.x, vec_1.y, vec_1.z);
+        let rot_1 = frames[self.first_arm].1[self.first_link];
+        let segment_pos_1 = Isometry3::from_parts(tra_1, rot_1);
 
-        let segment_2 = shape::Segment::new(start_pt_2, end_pt_2);
+        let vec_2 = &frames[self.second_arm].0[self.second_link];
+        let tra_2 = Translation3::new(vec_2.x, vec_2.y, vec_2.z);
+        let rot_2 = frames[self.second_arm].1[self.second_link];
+        let segment_pos_2 = Isometry3::from_parts(tra_2, rot_2);
+        
+        let dis = query::distance(&segment_pos_1, &*link_1.0, &segment_pos_2, &*link_2.0).unwrap();
 
-        let segment_pos = nalgebra::one();
-        // println!("start_pt_1:{} end_pt_1:{}  start_pt_2:{} end_pt_2:{} x: {:?}", start_pt_1, end_pt_1, start_pt_2, end_pt_2, x);
+        // if self.first_link < frames[self.first_arm].0.len() - 1 && self.second_link < frames[self.second_arm].0.len() - 1 {
+        //     let start_pt_1 = Point3::from(frames[self.first_arm].0[self.first_link]);
+        //     let end_pt_1 = Point3::from(frames[self.first_arm].0[self.first_link+1]);
+        //     let segment_1 = shape::Segment::new(start_pt_1, end_pt_1);
 
-        let dis = query::distance(&segment_pos, &segment_1, &segment_pos, &segment_2).unwrap() - link_radius;
-       
+        //     let start_pt_2 = Point3::from(frames[self.second_arm].0[self.second_link]);
+        //     let end_pt_2 = Point3::from(frames[self.second_arm].0[self.second_link+1]);
+        //     let segment_2 = shape::Segment::new(start_pt_2, end_pt_2);
+
+        //     let segment_pos = nalgebra::one();
+
+        //     // println!("start_pt_1:{} end_pt_1:{} start_pt_2:{} end_pt_2:{}", start_pt_1, end_pt_1, start_pt_2, end_pt_2);
+        //     let dis_old = query::distance(&segment_pos, &segment_1, &segment_pos, &segment_2).unwrap();
+        //     println!("dis_old: {:?} dis: {:?}", dis_old, dis);
+        //     assert!(dis_old == 0.0 || dis_old + 0.01 > dis);
+        // }
+
         swamp_loss(dis, 0.02, 1.5, 60.0, 0.0001, 30)
     }
 

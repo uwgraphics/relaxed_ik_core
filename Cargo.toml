@@ -23,6 +23,7 @@ serde = { version = "1.0.136", features = ["derive"] }
 dirs = "4.0.0"
 urdf-rs =  "0.6.7"
 k = "0.29"
+collada = "0.15.0"
 
 # Below are for webassembly
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
