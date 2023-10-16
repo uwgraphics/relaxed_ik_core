@@ -147,7 +147,7 @@ impl Robot {
                             shape::SharedShape::cuboid(half_extents.x, half_extents.y, half_extents.z)
                         },
                         k::link::Geometry::Cylinder { radius, length } => {
-                            shape::SharedShape::cylinder(*radius, *length / 2.0)
+                            shape::SharedShape::cylinder(*length / 2.0, *radius)
                         },
                         k::link::Geometry::Capsule { radius, length } => {
                             let half_length = *length / 2.0;
