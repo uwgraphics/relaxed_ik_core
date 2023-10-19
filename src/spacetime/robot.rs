@@ -137,6 +137,7 @@ impl Robot {
             let mut chain_meshes = Vec::new();
             
             serial_chain.iter_links().for_each(|link| {
+                println!("link name: {:?}", link.name);
                 let mut shapes_vec = Vec::new();
                 link.collisions.iter().for_each(|c| {
                     let parry_pose = *c.origin();
@@ -160,7 +161,7 @@ impl Robot {
                         },
                         k::link::Geometry::Mesh { filename, scale } => {
                             let file_path = convert_ros_package_path(filename).unwrap();
-                            println!("Loading {:?} from {:?}", filename, file_path);
+                            // println!("Loading {:?} from {:?}", filename, file_path);
                             load_dae_to_aabb(&file_path).unwrap()
                         },
                     };
@@ -169,7 +170,6 @@ impl Robot {
                     shapes_vec.push((parry_pose, parry_shape))
                 });
                 if !shapes_vec.is_empty() {
-                    println!("link name: {:?}", link.name);
                     let compound_shape = shape::SharedShape::compound(shapes_vec);
                     chain_meshes.push(compound_shape);
                 }
@@ -177,7 +177,8 @@ impl Robot {
             // println!("chain_meshes: {:?}", chain_meshes.len());
             link_meshes.push(chain_meshes);
 
-            serial_chain.iter_joints().for_each(|joint| {
+            serial_chain.iter().for_each(|node| {
+                let joint = node.joint();
                 println!("joint name: {:?}", joint.name);
                 match joint.joint_type {
                     k::JointType::Fixed => {
