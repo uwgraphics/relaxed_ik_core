@@ -1,6 +1,7 @@
 use nalgebra::{UnitQuaternion, Vector3, Vector6, Quaternion, Point3};
 use crate::spacetime::robot::Robot;
 use crate::utils_rust::file_utils::{*};
+use crate::groove::objective_master::{Weights, OptimizerOptions};
 use time::PreciseTime;
 use std::ops::Deref;
 use yaml_rust::{YamlLoader, Yaml};
@@ -9,6 +10,34 @@ use std::io::prelude::*;
 
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
+
+fn parse_weights(yaml: &Yaml) -> Weights {
+    if yaml.is_badvalue() {
+        return Weights::default();
+    }
+    let d = Weights::default();
+    let f = |key: &str, default: f64| -> f64 {
+        yaml[key].as_f64().unwrap_or(default)
+    };
+    Weights {
+        match_ee_position:       f("match_ee_position",       d.match_ee_position),
+        match_ee_orientation:    f("match_ee_orientation",    d.match_ee_orientation),
+        joint_limits:            f("joint_limits",            d.joint_limits),
+        minimize_velocity:       f("minimize_velocity",       d.minimize_velocity),
+        minimize_acceleration:   f("minimize_acceleration",   d.minimize_acceleration),
+        minimize_jerk:           f("minimize_jerk",           d.minimize_jerk),
+        maximize_manipulability: f("maximize_manipulability", d.maximize_manipulability),
+        self_collision:          f("self_collision",          d.self_collision),
+    }
+}
+
+fn parse_optimizer_options(yaml: &Yaml) -> OptimizerOptions {
+    let d = OptimizerOptions::default();
+    OptimizerOptions {
+        panoc_tolerance: yaml["panoc_tolerance"].as_f64().unwrap_or(d.panoc_tolerance),
+        panoc_max_iter: yaml["panoc_max_iter"].as_i64().map(|v| v as usize).unwrap_or(d.panoc_max_iter),
+    }
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct VarsConstructorData {
@@ -30,7 +59,9 @@ pub struct RelaxedIKVars {
     pub goal_quats: Vec<UnitQuaternion<f64>>,
     pub tolerances: Vec<Vector6<f64>>,
     pub init_ee_positions: Vec<Vector3<f64>>,
-    pub init_ee_quats: Vec<UnitQuaternion<f64>>
+    pub init_ee_quats: Vec<UnitQuaternion<f64>>,
+    pub weights: Weights,
+    pub opt_opts: OptimizerOptions,
 }
 impl RelaxedIKVars {
     pub fn from_local_settings(path_to_setting: &str) -> Self {
@@ -84,9 +115,13 @@ impl RelaxedIKVars {
             init_ee_quats.push(pose[i].1);
         }
 
+        let weights = parse_weights(&settings["weights"]);
+        let opt_opts = parse_optimizer_options(settings);
+
         RelaxedIKVars{robot, init_state: starting_config.clone(), xopt: starting_config.clone(),
             prev_state: starting_config.clone(), prev_state2: starting_config.clone(), prev_state3: starting_config.clone(),
-            goal_positions: init_ee_positions.clone(), goal_quats: init_ee_quats.clone(), tolerances, init_ee_positions, init_ee_quats}
+            goal_positions: init_ee_positions.clone(), goal_quats: init_ee_quats.clone(), tolerances, init_ee_positions, init_ee_quats,
+            weights, opt_opts}
     }
     
     // for webassembly
@@ -113,7 +148,8 @@ impl RelaxedIKVars {
 
         RelaxedIKVars{robot, init_state: configs.starting_config.clone(), xopt: configs.starting_config.clone(),
             prev_state: configs.starting_config.clone(), prev_state2: configs.starting_config.clone(), prev_state3: configs.starting_config.clone(),
-            goal_positions: init_ee_positions.clone(), goal_quats: init_ee_quats.clone(), tolerances, init_ee_positions, init_ee_quats}
+            goal_positions: init_ee_positions.clone(), goal_quats: init_ee_quats.clone(), tolerances, init_ee_positions, init_ee_quats,
+            weights: Weights::default(), opt_opts: OptimizerOptions::default()}
 
     }
 

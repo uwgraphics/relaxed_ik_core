@@ -1,0 +1,101 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to attach the artifact to (e.g. v0.1.0). Required for manual runs.'
+        required: true
+        type: string
+
+permissions:
+  contents: write   # needed to create / update a Release
+
+jobs:
+  build:
+    name: build (${{ matrix.platform }})
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runs_on: ubuntu-latest
+          # Add more rows here when you need them; the asset name
+          # convention is librelaxed_ik_lib-${platform}.so
+          # - platform: linux-aarch64
+          #   runs_on: ubuntu-22.04-arm
+          # - platform: darwin-x86_64
+          #   runs_on: macos-13
+          # - platform: darwin-arm64
+          #   runs_on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ matrix.platform }}-cargo-${{ hashFiles('**/Cargo.lock', 'Cargo.toml') }}
+
+      - name: cargo build --release
+        run: cargo build --release
+
+      - name: Stage artifact with platform-tagged name
+        run: |
+          mkdir -p artifacts
+          # macOS produces .dylib; Linux produces .so. We keep .so suffix in
+          # the asset name regardless so the Python downloader has one shape
+          # to look for. ctypes is fine loading a dylib via .so name on macOS
+          # but if you ever care, branch here on $RUNNER_OS.
+          src=$(ls target/release/librelaxed_ik_lib.* | head -n1)
+          cp "$src" "artifacts/librelaxed_ik_lib-${{ matrix.platform }}.so"
+          ls -la artifacts/
+
+      - name: Upload build artifact (for cross-job aggregation)
+        uses: actions/upload-artifact@v4
+        with:
+          name: librelaxed_ik_lib-${{ matrix.platform }}
+          path: artifacts/librelaxed_ik_lib-${{ matrix.platform }}.so
+          if-no-files-found: error
+
+  release:
+    name: publish github release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Show what we're shipping
+        run: ls -la dist/
+
+      - name: Create / update GitHub Release with assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          files: dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true

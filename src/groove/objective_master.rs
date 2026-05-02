@@ -1,6 +1,48 @@
 use crate::groove::objective::*;
 use crate::groove::vars::RelaxedIKVars;
 
+#[derive(Clone, Debug)]
+pub struct Weights {
+    pub match_ee_position: f64,
+    pub match_ee_orientation: f64,
+    pub joint_limits: f64,
+    pub minimize_velocity: f64,
+    pub minimize_acceleration: f64,
+    pub minimize_jerk: f64,
+    pub maximize_manipulability: f64,
+    pub self_collision: f64,
+}
+
+impl Default for Weights {
+    fn default() -> Self {
+        Self {
+            match_ee_position: 50.0,
+            match_ee_orientation: 10.0,
+            joint_limits: 0.1,
+            minimize_velocity: 0.7,
+            minimize_acceleration: 0.5,
+            minimize_jerk: 0.3,
+            maximize_manipulability: 1.0,
+            self_collision: 0.01,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct OptimizerOptions {
+    pub panoc_tolerance: f64,
+    pub panoc_max_iter: usize,
+}
+
+impl Default for OptimizerOptions {
+    fn default() -> Self {
+        Self {
+            panoc_tolerance: 0.0005,
+            panoc_max_iter: 100,
+        }
+    }
+}
+
 pub struct ObjectiveMaster {
     pub objectives: Vec<Box<dyn ObjectiveTrait + Send>>,
     pub num_chains: usize,
@@ -24,41 +66,45 @@ impl ObjectiveMaster {
 
 
     pub fn relaxed_ik(chain_lengths: &[usize]) -> Self {
+        Self::relaxed_ik_with_weights(chain_lengths, &Weights::default())
+    }
+
+    pub fn relaxed_ik_with_weights(chain_lengths: &[usize], w: &Weights) -> Self {
         let mut objectives: Vec<Box<dyn ObjectiveTrait + Send>> = Vec::new();
         let mut weight_priors: Vec<f64> = Vec::new();
         let num_chains = chain_lengths.len();
         let mut num_dofs = 0;
         for i in 0..num_chains {
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 0)));
-            weight_priors.push(50.0);
+            weight_priors.push(w.match_ee_position);
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 1)));
-            weight_priors.push(50.0);
+            weight_priors.push(w.match_ee_position);
             objectives.push(Box::new(MatchEEPosiDoF::new(i, 2)));
-            weight_priors.push(50.0);
+            weight_priors.push(w.match_ee_position);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 0)));
-            weight_priors.push(10.0);
+            weight_priors.push(w.match_ee_orientation);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 1)));
-            weight_priors.push(10.0);
+            weight_priors.push(w.match_ee_orientation);
             objectives.push(Box::new(MatchEERotaDoF::new(i, 2)));
-            weight_priors.push(10.0);
+            weight_priors.push(w.match_ee_orientation);
             // objectives.push(Box::new(EnvCollision::new(i)));
             // weight_priors.push(1.0);
             num_dofs += chain_lengths[i];
         }
 
         for j in 0..num_dofs {
-            objectives.push(Box::new(EachJointLimits::new(j))); weight_priors.push(0.1 );
+            objectives.push(Box::new(EachJointLimits::new(j))); weight_priors.push(w.joint_limits);
         }
 
-        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(0.7);
-        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(0.5);
-        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(0.3);
-        objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(1.0);
+        objectives.push(Box::new(MinimizeVelocity));   weight_priors.push(w.minimize_velocity);
+        objectives.push(Box::new(MinimizeAcceleration));    weight_priors.push(w.minimize_acceleration);
+        objectives.push(Box::new(MinimizeJerk));    weight_priors.push(w.minimize_jerk);
+        objectives.push(Box::new(MaximizeManipulability));    weight_priors.push(w.maximize_manipulability);
 
         for i in 0..num_chains {
             for j in 0..chain_lengths[i]-2 {
                 for k in j+2..chain_lengths[i] {
-                    objectives.push(Box::new(SelfCollision::new(0, j, k))); weight_priors.push(0.01 );
+                    objectives.push(Box::new(SelfCollision::new(0, j, k))); weight_priors.push(w.self_collision);
                 }
             }
         }
